@@ -212,6 +212,75 @@
   }
 
   .job-card.hidden-card { opacity: 0.55; border-style: dashed; }
+
+  /* Inspiration quote */
+  .quote-card {
+    background: linear-gradient(135deg, #1e3a5f 0%, #1e5a8a 40%, #2a7ab5 100%);
+    border: none;
+    border-radius: 16px;
+    padding: 40px 36px 34px;
+    margin-bottom: 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30, 90, 138, 0.25);
+  }
+  .quote-card::before {
+    content: "\201C";
+    position: absolute;
+    top: 8px;
+    left: 24px;
+    font-size: 120px;
+    color: rgba(255, 255, 255, 0.08);
+    font-family: Georgia, serif;
+    line-height: 1;
+  }
+  .quote-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse at top right, rgba(255,255,255,0.1) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .quote-text {
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.9;
+    color: #ffffff;
+    margin-bottom: 16px;
+    font-style: italic;
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    font-family: Georgia, 'Times New Roman', serif;
+    letter-spacing: 0.3px;
+  }
+  .quote-source {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+  }
+  .quote-emoji {
+    display: block;
+    font-size: 32px;
+    margin-bottom: 14px;
+    font-style: normal;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 640px) {
+    .quote-card { padding: 30px 22px 26px; }
+    .quote-text { font-size: 18px; }
+    .quote-emoji { font-size: 26px; }
+  }
+
   .footer { text-align: center; padding: 20px; color: var(--text-secondary); font-size: 12px; }
   .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
 
@@ -255,6 +324,47 @@ function loadHidden() {
 }
 function saveHidden(data) {
   try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(data)); } catch(e) {}
+}
+
+// ✨ Daily Inspiration Quotes
+const QUOTES = [
+  { text: "The best way to predict the future is to create it.", source: "Peter Drucker", emoji: "🌅" },
+  { text: "Everything you can imagine is real.", source: "Pablo Picasso", emoji: "🎨" },
+  { text: "Do not go where the path may lead, go instead where there is no path and leave a trail.", source: "Ralph Waldo Emerson", emoji: "🌿" },
+  { text: "She believed she could, so she did.", source: "R.S. Grey", emoji: "💫" },
+  { text: "Failure is simply the opportunity to begin again, this time more intelligently.", source: "Henry Ford", emoji: "🔄" },
+  { text: "You are never too old to set another goal or to dream a new dream.", source: "C.S. Lewis", emoji: "🌟" },
+  { text: "In the middle of every difficulty lies opportunity.", source: "Albert Einstein", emoji: "🌸" },
+  { text: "You don't have to see the whole staircase, just take the first step.", source: "Martin Luther King Jr.", emoji: "🪜" },
+  { text: "Courage doesn't mean you don't get afraid. Courage means you don't let fear stop you.", source: "Bethany Hamilton", emoji: "🔥" },
+  { text: "When one door closes, another opens; but we often look so long at the closed door that we do not see the one which has opened for us.", source: "Alexander Graham Bell", emoji: "🚪" },
+  { text: "The best time to plant a tree was twenty years ago. The second best time is now.", source: "Chinese Proverb", emoji: "🌳" },
+  { text: "It always seems impossible until it's done.", source: "Nelson Mandela", emoji: "⭐" },
+  { text: "Life begins at the end of your comfort zone.", source: "Neale Donald Walsch", emoji: "🦋" },
+  { text: "If you're going through hell, keep going.", source: "Winston Churchill", emoji: "🏔️" },
+  { text: "Everything will be okay in the end. If it's not okay, it's not the end.", source: "John Lennon", emoji: "🕊️" },
+  { text: "You are not starting from scratch. You are starting from experience.", source: "For Michal", emoji: "💎" },
+  { text: "Every day is a new chance to get closer to the life you want.", source: "Oprah Winfrey", emoji: "🌞" },
+  { text: "The world breaks everyone, and afterward, many are strong at the broken places.", source: "Ernest Hemingway, A Farewell to Arms", emoji: "💡" },
+  { text: "A journey of a thousand miles begins with a single step.", source: "Lao Tzu", emoji: "👣" },
+  { text: "I am not afraid of storms, for I am learning how to sail my ship.", source: "Louisa May Alcott, Little Women", emoji: "⛵" },
+  { text: "We may encounter many defeats but we must not be defeated.", source: "Maya Angelou", emoji: "🌺" },
+  { text: "The future belongs to those who believe in the beauty of their dreams.", source: "Eleanor Roosevelt", emoji: "🌈" },
+  { text: "When you want something, all the universe conspires in helping you to achieve it.", source: "Paulo Coelho, The Alchemist", emoji: "🌌" },
+  { text: "When we are no longer able to change a situation, we are challenged to change ourselves.", source: "Viktor Frankl, Man's Search for Meaning", emoji: "🔮" },
+  { text: "What lies behind us and what lies before us are tiny matters compared to what lies within us.", source: "Ralph Waldo Emerson", emoji: "✨" },
+  { text: "You gain strength, courage, and confidence by every experience in which you really stop to look fear in the face.", source: "Eleanor Roosevelt", emoji: "🦁" },
+  { text: "The only impossible journey is the one you never begin.", source: "Tony Robbins", emoji: "🧭" },
+  { text: "Stars can't shine without darkness.", source: "D.H. Sidebottom", emoji: "🌃" },
+  { text: "You are braver than you believe, stronger than you seem, and smarter than you think.", source: "A.A. Milne, Winnie the Pooh", emoji: "🍯" },
+  { text: "Berlin is yours. The job is yours. The future is yours. It's all coming together.", source: "For Michal", emoji: "🇩🇪" },
+];
+
+function getDailyQuote() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  return QUOTES[dayOfYear % QUOTES.length];
 }
 
 // Export all tracking data as a downloadable JSON file
@@ -587,6 +697,8 @@ function App() {
   const lastUpdated = new Date(LAST_UPDATED);
   const formattedDate = lastUpdated.toLocaleDateString("he-IL", { year: "numeric", month: "long", day: "numeric" });
 
+  const dailyQuote = useMemo(() => getDailyQuote(), []);
+
   return (
     <div>
       <div className="header">
@@ -596,6 +708,13 @@ function App() {
         </div>
       </div>
       <div className="container">
+
+        {/* Daily inspiration */}
+        <div className="quote-card">
+          <span className="quote-emoji">{dailyQuote.emoji}</span>
+          <div className="quote-text">״{dailyQuote.text}״</div>
+          <div className="quote-source">— {dailyQuote.source}</div>
+        </div>
 
         {/* Urgent banner */}
         {urgentJobs.length > 0 && activeTab === "jobs" && activeFilter !== "urgent" && (
