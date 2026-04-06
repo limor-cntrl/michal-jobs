@@ -211,6 +211,7 @@
     text-align: center;
   }
 
+  .job-card.hidden-card { opacity: 0.55; border-style: dashed; }
   .footer { text-align: center; padding: 20px; color: var(--text-secondary); font-size: 12px; }
   .empty-state { text-align: center; padding: 40px; color: var(--text-secondary); }
 
@@ -235,6 +236,7 @@ const LAST_UPDATED = "2026-04-05T08:00:00";
 const TODAY = new Date().toISOString().split("T")[0];
 const STORAGE_KEY = "michal_cv_tracking";
 const NOTES_KEY = "michal_job_notes";
+const HIDDEN_KEY = "michal_hidden_jobs";
 
 function loadTracking() {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch(e) { return {}; }
@@ -248,14 +250,21 @@ function loadNotes() {
 function saveNotes(data) {
   try { localStorage.setItem(NOTES_KEY, JSON.stringify(data)); } catch(e) {}
 }
+function loadHidden() {
+  try { return JSON.parse(localStorage.getItem(HIDDEN_KEY)) || {}; } catch(e) { return {}; }
+}
+function saveHidden(data) {
+  try { localStorage.setItem(HIDDEN_KEY, JSON.stringify(data)); } catch(e) {}
+}
 
 // Export all tracking data as a downloadable JSON file
-function exportData(cvTracking, notes) {
+function exportData(cvTracking, notes, hiddenJobs) {
   const data = {
     version: 2,
     exportDate: new Date().toISOString(),
     cvTracking: cvTracking,
     notes: notes || {},
+    hiddenJobs: arguments[2] || {},
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
@@ -281,7 +290,7 @@ function importData(callback) {
       try {
         const data = JSON.parse(ev.target.result);
         if (data.cvTracking) {
-          callback(data.cvTracking, data.notes || {});
+          callback(data.cvTracking, data.notes || {}, data.hiddenJobs || {});
         }
       } catch(err) {
         alert("קובץ לא תקין");
@@ -469,6 +478,8 @@ function App() {
   const [activeTab, setActiveTab] = useState("jobs");
   const [cvTracking, setCvTracking] = useState(loadTracking);
   const [notes, setNotes] = useState(loadNotes);
+  const [hiddenJobs, setHiddenJobs] = useState(loadHidden);
+  const [showHidden, setShowHidden] = useState(false);
   const [importMsg, setImportMsg] = useState("");
 
   const toggleCvSent = useCallback((jobId) => {
@@ -484,13 +495,25 @@ function App() {
     });
   }, []);
 
+  const toggleHidden = useCallback((jobId) => {
+    setHiddenJobs(prev => {
+      const next = { ...prev };
+      if (next[jobId]) {
+        delete next[jobId];
+      } else {
+        next[jobId] = new Date().toISOString().split("T")[0];
+      }
+      saveHidden(next);
+      return next;
+    });
+  }, []);
+
   const handleExport = useCallback(() => {
-    exportData(cvTracking, notes);
-  }, [cvTracking, notes]);
+    exportData(cvTracking, notes, hiddenJobs);
+  }, [cvTracking, notes, hiddenJobs]);
 
   const handleImport = useCallback(() => {
-    importData((imported, importedNotes) => {
-      // Merge: keep existing + add imported (imported wins on conflict)
+    importData((imported, importedNotes, importedHidden) => {
       setCvTracking(prev => {
         const merged = { ...prev, ...imported };
         saveTracking(merged);
@@ -503,48 +526,63 @@ function App() {
           return merged;
         });
       }
+      if (importedHidden && Object.keys(importedHidden).length > 0) {
+        setHiddenJobs(prev => {
+          const merged = { ...prev, ...importedHidden };
+          saveHidden(merged);
+          return merged;
+        });
+      }
       const count = Object.keys(imported).length;
       setImportMsg(`נטענו ${count} סימונים בהצלחה!`);
       setTimeout(() => setImportMsg(""), 4000);
     });
   }, []);
 
-  const urgentJobs = useMemo(() => JOBS.filter(isUrgent), []);
+  const urgentJobs = useMemo(() => JOBS.filter(j => isUrgent(j) && !hiddenJobs[j.id]), [hiddenJobs]);
 
   const filteredJobs = useMemo(() => {
     let jobs = JOBS;
-    if (activeFilter === "urgent") {
-      jobs = jobs.filter(isUrgent);
-    } else if (activeFilter === "sent") {
-      jobs = jobs.filter(j => cvTracking[j.id]);
-    } else if (activeFilter === "notsent") {
-      jobs = jobs.filter(j => !cvTracking[j.id]);
-    } else if (activeFilter !== "all") {
-      jobs = jobs.filter(j => j.category === activeFilter);
+    // Hide dismissed jobs unless viewing hidden
+    if (activeFilter === "hidden") {
+      jobs = jobs.filter(j => hiddenJobs[j.id]);
+    } else {
+      if (!showHidden) jobs = jobs.filter(j => !hiddenJobs[j.id]);
+      if (activeFilter === "urgent") {
+        jobs = jobs.filter(isUrgent);
+      } else if (activeFilter === "sent") {
+        jobs = jobs.filter(j => cvTracking[j.id]);
+      } else if (activeFilter === "notsent") {
+        jobs = jobs.filter(j => !cvTracking[j.id]);
+      } else if (activeFilter !== "all") {
+        jobs = jobs.filter(j => j.category === activeFilter);
+      }
     }
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       jobs = jobs.filter(j => j.title.toLowerCase().includes(term) || j.company.toLowerCase().includes(term) || j.description.includes(term));
     }
-    // Urgent first, then by match score
     return jobs.sort((a, b) => {
       const aUrg = isUrgent(a) ? 1 : 0;
       const bUrg = isUrgent(b) ? 1 : 0;
       if (bUrg !== aUrg) return bUrg - aUrg;
       return b.matchScore - a.matchScore;
     });
-  }, [activeFilter, searchTerm]);
+  }, [activeFilter, searchTerm, hiddenJobs, showHidden]);
+
+  const visibleJobs = useMemo(() => JOBS.filter(j => !hiddenJobs[j.id]), [hiddenJobs]);
+  const hiddenCount = Object.keys(hiddenJobs).length;
 
   const stats = useMemo(() => ({
-    total: JOBS.length,
-    urgent: urgentJobs.length,
-    sent: Object.keys(cvTracking).length,
-    ngo: JOBS.filter(j => j.category === "ngo").length,
-    social: JOBS.filter(j => j.category === "social").length,
-    education: JOBS.filter(j => j.category === "education").length,
-    remote: JOBS.filter(j => j.remote).length,
-    parttime: JOBS.filter(j => j.type.includes("80%") || j.type.includes("חלקית") || j.type.includes("32")).length,
-  }), [cvTracking]);
+    total: visibleJobs.length,
+    urgent: visibleJobs.filter(isUrgent).length,
+    sent: Object.keys(cvTracking).filter(id => !hiddenJobs[id]).length,
+    ngo: visibleJobs.filter(j => j.category === "ngo").length,
+    social: visibleJobs.filter(j => j.category === "social").length,
+    education: visibleJobs.filter(j => j.category === "education").length,
+    remote: visibleJobs.filter(j => j.remote).length,
+    hidden: hiddenCount,
+  }), [cvTracking, hiddenJobs]);
 
   const lastUpdated = new Date(LAST_UPDATED);
   const formattedDate = lastUpdated.toLocaleDateString("he-IL", { year: "numeric", month: "long", day: "numeric" });
@@ -610,6 +648,9 @@ function App() {
               {[["all","הכל"],["urgent","דד-ליין קרוב"],["sent","שלחתי קו\"ח"],["notsent","טרם נשלח"],["ngo","NGO / זכויות אדם"],["social","Social Impact"],["education","חינוך"]].map(([k,l])=>(
                 <button key={k} className={`filter-btn ${k==="urgent"?"urgent-filter":""} ${activeFilter===k?"active":""}`} onClick={()=>setActiveFilter(k)}>{l}</button>
               ))}
+              {hiddenCount > 0 && (
+                <button className={`filter-btn ${activeFilter==="hidden"?"active":""}`} style={{opacity:0.7,fontSize:12}} onClick={()=>setActiveFilter(activeFilter==="hidden"?"all":"hidden")}>הוסתרו ({hiddenCount})</button>
+              )}
               <input className="search-input" placeholder="חיפוש חופשי..." value={searchTerm} onChange={e=>setSearchTerm(e.target.value)} />
             </div>
             <div className="job-list">
@@ -619,7 +660,7 @@ function App() {
                 const urgent = isUrgent(job);
                 const deadlineDays = job.deadline ? daysUntil(job.deadline) : null;
                 return (
-                  <div className={`job-card ${urgent ? "urgent-card" : ""}`} key={job.id}>
+                  <div className={`job-card ${urgent ? "urgent-card" : ""} ${hiddenJobs[job.id] ? "hidden-card" : ""}`} key={job.id}>
                     <div className="job-card-top">
                       <div style={{flex:1}}>
                         <div className="job-title">
@@ -661,30 +702,52 @@ function App() {
                       )}
                     </div>
 
-                    <div style={{display:"flex",alignItems:"center",gap:12,marginTop:10,flexWrap:"wrap"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:10,marginTop:10,flexWrap:"wrap"}}>
                       <a href={job.url} target="_blank" rel="noopener noreferrer" className="apply-btn" style={{marginTop:0}}>
                         {urgent ? "להגיש עכשיו" : "לצפייה ומועמדות"}
                       </a>
-                      <div className={`cv-tracker ${cvTracking[job.id] ? "sent" : ""}`}>
-                        <div
-                          className={`cv-check ${cvTracking[job.id] ? "checked" : ""}`}
-                          onClick={() => toggleCvSent(job.id)}
-                          role="checkbox"
-                          aria-checked={!!cvTracking[job.id]}
-                          tabIndex={0}
-                          onKeyDown={e => { if(e.key==="Enter"||e.key===" ") toggleCvSent(job.id); }}
-                        >
-                          {cvTracking[job.id] ? "✓" : ""}
+                      {!hiddenJobs[job.id] && (
+                        <div className={`cv-tracker ${cvTracking[job.id] ? "sent" : ""}`}>
+                          <div
+                            className={`cv-check ${cvTracking[job.id] ? "checked" : ""}`}
+                            onClick={() => toggleCvSent(job.id)}
+                            role="checkbox"
+                            aria-checked={!!cvTracking[job.id]}
+                            tabIndex={0}
+                            onKeyDown={e => { if(e.key==="Enter"||e.key===" ") toggleCvSent(job.id); }}
+                          >
+                            {cvTracking[job.id] ? "✓" : ""}
+                          </div>
+                          {cvTracking[job.id] ? (
+                            <span>
+                              <span className="cv-label sent-label">שלחתי קו"ח</span>
+                              <span className="cv-date"> — {cvTracking[job.id]}</span>
+                            </span>
+                          ) : (
+                            <span className="cv-label">סמני כשנשלח קו"ח</span>
+                          )}
                         </div>
-                        {cvTracking[job.id] ? (
-                          <span>
-                            <span className="cv-label sent-label">שלחתי קו"ח</span>
-                            <span className="cv-date"> — {cvTracking[job.id]}</span>
-                          </span>
-                        ) : (
-                          <span className="cv-label">סמני כשנשלח קו"ח</span>
-                        )}
-                      </div>
+                      )}
+                      <button
+                        onClick={() => toggleHidden(job.id)}
+                        style={{
+                          background: hiddenJobs[job.id] ? "var(--accent-light)" : "none",
+                          border: "1px solid var(--border)",
+                          borderRadius: 6,
+                          padding: "5px 12px",
+                          cursor: "pointer",
+                          fontSize: 13,
+                          fontFamily: "'Assistant', sans-serif",
+                          color: hiddenJobs[job.id] ? "var(--accent)" : "var(--text-secondary)",
+                          transition: "all 0.15s",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 4,
+                        }}
+                        title={hiddenJobs[job.id] ? "להחזיר לרשימה" : "להסתיר משרה זו"}
+                      >
+                        {hiddenJobs[job.id] ? "↩ החזרה" : "✕ לא רלוונטי"}
+                      </button>
                     </div>
                   </div>
                 );
