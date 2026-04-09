@@ -94,6 +94,7 @@
   .badge-remote { background: var(--cat3-light); color: var(--cat3); }
   .category-tag { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
   .cat-ngo { background: var(--cat1-light); color: var(--cat1); }
+  .cat-hebrew { background: #e8f5e9; color: #2e7d32; }
   .cat-jewish { background: var(--cat2-light); color: var(--cat2); }
   .cat-education { background: var(--cat3-light); color: var(--cat3); }
   .cat-social { background: var(--cat4-light); color: var(--cat4); }
@@ -301,7 +302,7 @@
 <script type="text/babel">
 const { useState, useMemo, useEffect, useCallback } = React;
 
-const LAST_UPDATED = "2026-04-06T10:00:00";
+const LAST_UPDATED = "2026-04-09T12:00:00";
 const TODAY = new Date().toISOString().split("T")[0];
 const STORAGE_KEY = "michal_cv_tracking";
 const NOTES_KEY = "michal_job_notes";
@@ -412,69 +413,91 @@ function importData(callback) {
 }
 
 const JOBS = [
-  // === NGO / זכויות אדם — משרות אמיתיות מאומתות ===
+  // === עדכון 9 באפריל 2026 — משרות מאומתות ורלוונטיות בלבד ===
+
+  // --- Track 1: התאמה לקורות חיים — זכויות אדם, מדיניות, advocacy ---
   {
-    id: 1, title: "Senior Legal Advisor — Business and Human Rights (f/m/n)",
-    company: "ECCHR (European Center for Constitutional and Human Rights)", category: "ngo",
-    url: "https://www.impactpool.org/jobs/1085649",
-    location: "ברלין", type: "משרה מלאה / 80%", remote: false,
-    dateFound: "2026-04-05", datePublished: null, deadline: null,
-    matchScore: 97, isNew: true,
-    description: "ניהול פרויקטי ליטיגציה בינלאומית בתחום אחריות תאגידית וזכויות אדם. כתיבת ניתוחים משפטיים, ניהול שותפויות ו-advocacy. דורש 5+ שנות ניסיון. אפשרות ל-80% משרה!"
-  },
-  {
-    id: 2, title: "Head of Labour Rights",
-    company: "Business & Human Rights Resource Centre", category: "ngo",
-    url: "https://unjobs.org/vacancies/1774280686417",
-    location: "ברלין / לונדון (גמיש)", type: "משרה מלאה — קבועה", remote: true,
-    dateFound: "2026-04-05", datePublished: "2026-03-20", deadline: "2026-04-07",
-    matchScore: 95, isNew: true,
-    description: "הובלת תוכנית זכויות עובדים — מחקר, ניתוח ואסטרטגיה בנושאי עבודת כפייה, חופש התאגדות ותנאי עבודה. משכורת £54,500-60,000. ראיונות 7-8 באפריל!"
-  },
-  {
-    id: 3, title: "Policy and Advocacy Specialist (P-3) — Berlin Office",
+    id: 101, title: "Policy and Advocacy Specialist (P-3) — Berlin Office",
     company: "UNFPA (United Nations Population Fund)", category: "ngo",
     url: "https://www.unfpa.org/jobs/policy-and-advocacy-specialist-berlin-representation-office-division-external-relations-berlin",
-    location: "ברלין", type: "משרה מלאה", remote: false,
-    dateFound: "2026-04-05", datePublished: null, deadline: null,
-    matchScore: 94, isNew: true,
-    description: "ייעוץ אסטרטגי ל-UNFPA בגרמניה ובמרכז אירופה. קשרים עם ממשלות, פרלמנטרים, NGOs ומדיה. משרד חדש בברלין. דרגה P-3."
+    location: "ברלין", type: "משרה מלאה — UN P-3", remote: false,
+    dateFound: "2026-04-09", datePublished: "2026-02-06", deadline: null,
+    matchScore: 96, isNew: true,
+    description: "משרד UNFPA חדש בברלין! ייעוץ אסטרטגי מול ממשלות, פרלמנטרים, NGOs ומדיה בגרמניה, אוסטריה ומרכז אירופה. דרגת P-3 במערכת האו\"ם. התאמה מושלמת לניסיון במדיניות ו-advocacy."
   },
   {
-    id: 4, title: "Global Advocacy Coordinator (m/f/d)",
+    id: 102, title: "Board & Council Engagement Officer (m/f/d)",
+    company: "ECFR (European Council on Foreign Relations)", category: "ngo",
+    url: "https://ecfr.jobs.personio.com/job/2323670?language=en",
+    location: "ברלין או לונדון", type: "משרה מלאה", remote: false,
+    dateFound: "2026-04-09", datePublished: "2026-03-15", deadline: null,
+    matchScore: 93, isNew: true,
+    description: "צוות Advocacy — ארגון בריפינגים ומפגשים עם מקבלי החלטות מובילים באירופה. ניהול Board meetings ו-Annual Council Meeting. עבודה עם פוליטיקאים ומומחי מדיניות חוץ. אנגלית — שפת העבודה!"
+  },
+  {
+    id: 103, title: "Scientific Staff — Asylum System Monitoring (m/f/d)",
+    company: "German Institute for Human Rights", category: "ngo",
+    url: "https://www.institut-fuer-menschenrechte.de/en/institute/careers",
+    location: "ברלין", type: "משרה מלאה", remote: false,
+    dateFound: "2026-04-09", datePublished: "2026-03-28", deadline: "2026-04-12",
+    matchScore: 91, isNew: true,
+    description: "מנגנון ניטור מערכת המקלט האירופית (CEAS). מחקר, ניתוח מדיניות וזכויות אדם. דרוש תואר שני. דדליין: 12 באפריל! מוסד הזכויות הלאומי של גרמניה."
+  },
+  {
+    id: 104, title: "Global Advocacy Coordinator (m/f/d)",
     company: "Transparency International", category: "ngo",
     url: "https://www.impactpool.org/jobs/1021584",
     location: "ברלין", type: "משרה מלאה", remote: false,
     dateFound: "2026-04-05", datePublished: null, deadline: null,
-    matchScore: 92, isNew: true,
-    description: "תיאום advocacy מבוסס מחקר מול מוסדות בינלאומיים (G20, OECD, UN, World Bank). דורש 5+ שנות ניסיון במדיניות ו-advocacy. מטה עולמי בברלין."
+    matchScore: 92, isNew: false,
+    description: "תיאום advocacy מבוסס מחקר מול מוסדות בינלאומיים (G20, OECD, UN, World Bank). דורש 5+ שנות ניסיון במדיניות ו-advocacy. מטה עולמי בברלין. אנגלית — שפת העבודה."
   },
   {
-    id: 6, title: "Policy Advisor, Development Investments (m/f/d)",
+    id: 105, title: "Policy Advisor, Development Investments (m/f/d)",
     company: "Transparency International", category: "ngo",
     url: "https://www.impactpool.org/jobs/1183455",
     location: "ברלין", type: "משרה מלאה", remote: false,
     dateFound: "2026-04-05", datePublished: null, deadline: null,
-    matchScore: 90, isNew: true,
-    description: "ייעוץ מדיניות נגד שחיתות למומחי פיתוח. צוות Policy & Advocacy. דורש ניסיון בינלאומי. מטה בברלין."
+    matchScore: 90, isNew: false,
+    description: "ייעוץ מדיניות נגד שחיתות למומחי פיתוח. צוות Policy & Advocacy. דורש ניסיון בינלאומי. תחילת עבודה 2026 (בכפוף לאישור תקציב)."
   },
   {
-    id: 7, title: "Research Coordinator (m/f/d)",
+    id: 106, title: "Research Advisor (m/f/d)",
     company: "Transparency International", category: "ngo",
-    url: "https://www.impactpool.org/jobs/1196267",
+    url: "https://www.impactpool.org/jobs/1182663",
     location: "ברלין", type: "משרה מלאה", remote: false,
-    dateFound: "2026-04-05", datePublished: "2026-02-01", deadline: null,
-    matchScore: 85, isNew: true,
-    description: "מחקר שולחני, הפקת חומרים מקוריים, בניית יכולות מחקר. משכורת €42,000 ברוטו/שנה. חוזה עד דצמבר 2027."
+    dateFound: "2026-04-09", datePublished: null, deadline: null,
+    matchScore: 87, isNew: true,
+    description: "צוות Research & Knowledge — ייעוץ מחקרי נגד שחיתות, הכנת חומרי הדרכה ופיתוח מתודולוגיות. מטה עולמי בברלין. תחילה מוקדמת 2026."
   },
   {
-    id: 8, title: "Expert Communications & Engagement — Anticipatory Action",
+    id: 107, title: "Expert Communications & Engagement — Anticipatory Action",
     company: "Deutsche Welthungerhilfe (WHH)", category: "ngo",
     url: "https://www.impactpool.org/jobs/1202557",
     location: "ברלין / בון", type: "משרה מלאה", remote: false,
     dateFound: "2026-04-05", datePublished: "2026-03-25", deadline: "2026-04-13",
-    matchScore: 78, isNew: true,
-    description: "פיתוח אסטרטגיית תקשורת לתוכנית WAHAFA. ניראות בינלאומית לפעולה הומניטרית מקדימה. חוזה עד אפריל 2029. כניסה: מאי 2026."
+    matchScore: 80, isNew: false,
+    description: "פיתוח אסטרטגיית תקשורת לתוכנית WAHAFA. ניראות בינלאומית לפעולה הומניטרית מקדימה. חוזה עד 2029. דדליין: 13 באפריל!"
+  },
+  {
+    id: 108, title: "Head of Operations — Displacement Tracking (DTM) (P-4)",
+    company: "IOM (International Organization for Migration)", category: "ngo",
+    url: "https://unjobs.org/vacancies/1736189132345",
+    location: "ברלין", type: "משרה מלאה — UN P-4", remote: false,
+    dateFound: "2026-04-09", datePublished: "2026-01-06", deadline: null,
+    matchScore: 85, isNew: true,
+    description: "ניהול מערכת מעקב עקורים גלובלית ממשרד ברלין. דרגת P-4 במערכת האו\"ם. חוזה שנה + אפשרות הארכה. ניסיון בניהול פרויקטים בינלאומיים — יתרון גדול."
+  },
+
+  // --- Track 3: משרות בעברית — יתרון ייחודי! ---
+  {
+    id: 301, title: "Enterprise Account Manager (Hebrew Speaking)",
+    company: "Adyen", category: "hebrew",
+    url: "https://careers.adyen.com/vacancies/5776852-enterprise-account-manager-hebrew-speaker",
+    location: "ברלין", type: "משרה מלאה — hybrid", remote: false,
+    dateFound: "2026-04-09", datePublished: null, deadline: null,
+    matchScore: 82, isNew: true,
+    description: "חברת פינטק גלובלית! ניהול לקוחות ארגוניים דוברי עברית. דרוש: עברית + אנגלית ברמה מקצועית. גרמנית — יתרון אבל לא חובה! משרד ב-Alexanderplatz, מודל היברידי."
   },
 ];
 
@@ -509,8 +532,8 @@ const CAREER_PAGES = [
   { name: "Bard College Berlin", url: "https://berlin.bard.edu/about-us/employment/", desc: "קולג' בינלאומי באנגלית" },
 ];
 
-const CATEGORY_LABELS = { ngo: "NGO / זכויות אדם", social: "Social Impact", education: "חינוך" };
-const CATEGORY_CLASSES = { ngo: "cat-ngo", social: "cat-social", education: "cat-education" };
+const CATEGORY_LABELS = { ngo: "NGO / זכויות אדם", hebrew: "עברית — יתרון!", social: "Social Impact", education: "חינוך" };
+const CATEGORY_CLASSES = { ngo: "cat-ngo", hebrew: "cat-hebrew", social: "cat-social", education: "cat-education" };
 
 function daysUntil(dateStr) {
   if (!dateStr) return null;
@@ -639,6 +662,7 @@ function App() {
     urgent: visibleJobs.filter(isUrgent).length,
     sent: Object.keys(cvTracking).filter(id => !hiddenJobs[id]).length,
     ngo: visibleJobs.filter(j => j.category === "ngo").length,
+    hebrew: visibleJobs.filter(j => j.category === "hebrew").length,
     social: visibleJobs.filter(j => j.category === "social").length,
     education: visibleJobs.filter(j => j.category === "education").length,
     remote: visibleJobs.filter(j => j.remote).length,
@@ -655,7 +679,7 @@ function App() {
       <div className="header">
         <div className="container">
           <h1>חיפוש עבודה — מיכל זיו, ברלין</h1>
-          <p>עודכן: {formattedDate} | רק משרות אמיתיות מאומתות | באנגלית, ללא גרמנית</p>
+          <p>עודכן: {formattedDate} | רק משרות רלוונטיות ומאומתות | אנגלית, עברית, צרפתית — ללא גרמנית</p>
         </div>
       </div>
       <div className="container">
@@ -686,6 +710,7 @@ function App() {
           <div className="stat-card"><div className="number" style={{color:"var(--success)"}}>{stats.sent}</div><div className="label">שלחתי קו"ח</div></div>
           {stats.urgent > 0 && <div className="stat-card"><div className="number" style={{color:"var(--danger)"}}>{stats.urgent}</div><div className="label">דד-ליין קרוב</div></div>}
           <div className="stat-card"><div className="number" style={{color:"var(--cat1)"}}>{stats.ngo}</div><div className="label">NGO / זכויות אדם</div></div>
+          {stats.hebrew > 0 && <div className="stat-card"><div className="number" style={{color:"#2e7d32"}}>{stats.hebrew}</div><div className="label">עברית — יתרון!</div></div>}
           <div className="stat-card"><div className="number" style={{color:"var(--cat4)"}}>{stats.social}</div><div className="label">Social Impact</div></div>
           <div className="stat-card"><div className="number" style={{color:"var(--success)"}}>{stats.remote}</div><div className="label">Remote / גמיש</div></div>
         </div>
@@ -715,7 +740,7 @@ function App() {
           <div>
             <div className="filters">
               <span style={{fontSize:12,fontWeight:600,color:"var(--text-secondary)"}}>סינון:</span>
-              {[["all","הכל"],["urgent","דד-ליין קרוב"],["sent","שלחתי קו\"ח"],["notsent","טרם נשלח"],["ngo","NGO / זכויות אדם"],["social","Social Impact"],["education","חינוך"]].map(([k,l])=>(
+              {[["all","הכל"],["urgent","דד-ליין קרוב"],["sent","שלחתי קו\"ח"],["notsent","טרם נשלח"],["ngo","NGO / זכויות אדם"],["hebrew","עברית — יתרון!"],["social","Social Impact"],["education","חינוך"]].map(([k,l])=>(
                 <button key={k} className={`filter-btn ${k==="urgent"?"urgent-filter":""} ${activeFilter===k?"active":""}`} onClick={()=>setActiveFilter(k)}>{l}</button>
               ))}
               {hiddenCount > 0 && (
