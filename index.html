@@ -3,38 +3,266 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>לוח משרות – מיכל זיו | ברלין 2026</title>
+<title>לוח משרות - מיכל זיו | Berlin Job Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: #f0f4f8;
-    direction: rtl;
-    color: #2d3748;
+    font-family: 'Heebo', sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
     min-height: 100vh;
+    color: #e0e0e0;
   }
-  #root { min-height: 100vh; }
+
+  .header {
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .header h1 {
+    font-size: 1.8em;
+    font-weight: 700;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header .subtitle { font-size: 0.9em; color: #999; margin-top: 4px; }
+  .header .date { font-size: 0.85em; color: #888; }
+
+  .container { max-width: 1400px; margin: 0 auto; padding: 20px 40px; }
+
+  .stats-bar {
+    display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+  }
+
+  .stat-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 16px 24px;
+    flex: 1;
+    min-width: 140px;
+    text-align: center;
+  }
+
+  .stat-card .number { font-size: 2em; font-weight: 700; color: #667eea; }
+  .stat-card .label { font-size: 0.8em; color: #999; margin-top: 4px; }
+
+  .filters {
+    display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; align-items: center;
+  }
+
+  .filter-btn {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: #ccc;
+    cursor: pointer;
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.85em;
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover { background: rgba(255,255,255,0.1); }
+  .filter-btn.active { background: #667eea; color: white; border-color: #667eea; }
+
+  .search-input {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.05);
+    color: #e0e0e0;
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.85em;
+    outline: none;
+    width: 220px;
+    direction: ltr;
+    text-align: right;
+  }
+
+  .search-input::placeholder { color: #777; }
+
+  .jobs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+  }
+
+  .job-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 20px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .job-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(102,126,234,0.4);
+    box-shadow: 0 8px 32px rgba(102,126,234,0.15);
+  }
+
+  .job-card.hidden-card { opacity: 0.3; }
+
+  .job-card .new-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    color: white;
+    font-size: 0.7em;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+  }
+
+  .job-card .match-score {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 0.75em;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 10px;
+    direction: ltr;
+  }
+
+  .score-high { background: rgba(76,175,80,0.2); color: #81c784; }
+  .score-medium { background: rgba(255,183,77,0.2); color: #ffb74d; }
+  .score-low { background: rgba(229,115,115,0.2); color: #ef9a9a; }
+
+  .job-card .category-tag {
+    display: inline-block;
+    font-size: 0.7em;
+    padding: 2px 10px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    margin-top: 6px;
+  }
+
+  .cat-ngo { background: rgba(102,126,234,0.2); color: #90a4f4; }
+  .cat-social { background: rgba(156,39,176,0.2); color: #ce93d8; }
+  .cat-education { background: rgba(0,188,212,0.2); color: #80deea; }
+  .cat-tech { background: rgba(255,152,0,0.2); color: #ffcc80; }
+  .cat-other { background: rgba(158,158,158,0.2); color: #bdbdbd; }
+
+  .job-card h3 { font-size: 1.05em; font-weight: 600; color: #e8e8e8; margin-bottom: 6px; line-height: 1.4; }
+  .job-card .company { font-size: 0.9em; color: #a8a8d8; font-weight: 500; margin-bottom: 8px; }
+  .job-card .description { font-size: 0.82em; color: #999; line-height: 1.5; margin-bottom: 12px; }
+
+  .job-card .meta {
+    display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.78em; color: #888; margin-bottom: 12px;
+  }
+
+  .job-card .meta span { display: flex; align-items: center; gap: 4px; }
+
+  .job-card .actions {
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+
+  .btn-apply {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: none;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.82em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .btn-apply:hover { opacity: 0.85; }
+
+  .btn-hide {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: transparent;
+    color: #888;
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.82em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-hide:hover { background: rgba(255,255,255,0.05); }
+
+  .btn-cv {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(76,175,80,0.3);
+    background: rgba(76,175,80,0.1);
+    color: #81c784;
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.82em;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-cv:hover { background: rgba(76,175,80,0.2); }
+  .btn-cv.sent { background: rgba(76,175,80,0.3); color: #a5d6a7; }
+
+  .quote-bar {
+    margin-top: 30px;
+    padding: 20px 30px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+    font-style: italic;
+    color: #888;
+    font-size: 0.9em;
+    line-height: 1.6;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #777;
+  }
+
+  .empty-state .emoji { font-size: 3em; margin-bottom: 16px; }
+
+  .toggle-hidden {
+    padding: 8px 18px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
+    color: #777;
+    cursor: pointer;
+    font-family: 'Heebo', sans-serif;
+    font-size: 0.82em;
+    margin-right: auto;
+  }
+
+  @media (max-width: 768px) {
+    .header { padding: 16px 20px; flex-direction: column; gap: 8px; }
+    .container { padding: 16px 20px; }
+    .jobs-grid { grid-template-columns: 1fr; }
+    .filters { gap: 6px; }
+  }
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const { useState, useEffect } = React;
-
-const LAST_UPDATED = "2026-04-07";
-
-const INSPIRATIONAL_QUOTES = [
-  { text: "הצלחה היא לא סופית, כישלון אינו קטלני: הדבר החשוב הוא האומץ להמשיך.", author: "וינסטון צ'רצ'יל" },
-  { text: "אל תחכי להזדמנות המושלמת. תפסי את ההזדמנות והפכי אותה למושלמת.", author: "ג'ין רוצ'" },
-  { text: "כל המסעות הגדולים מתחילים בצעד קטן אחד.", author: "לאו דזה" },
-  { text: "האנשים שמשגשגים לא מחכים לדברים שיקרו – הם גורמים לדברים לקרות.", author: "אנונימי" },
-  { text: "הצלחה היא מה שקורה כשהכנה פוגשת הזדמנות.", author: "סנקה" },
-  { text: "חשבי על הסיבה שאתם עושה את זה. כשהסיבה גדולה מספיק, הדרך תמצא את עצמה.", author: "אנונימי" },
-  { text: "כל ניסיון שאני לא עברת הוא פגישה שלא קיימה, וכל ניסיון שעברת הוא צעד קדימה.", author: "אנונימי" }
-];
+const LAST_UPDATED = "2026-04-09";
 
 const JOBS = [
   {
@@ -46,390 +274,441 @@ const JOBS = [
     location: "ברלין",
     type: "משרה מלאה",
     remote: false,
-    dateFound: "2026-04-07",
-    datePublished: "2025-11-15",
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-01",
     deadline: null,
-    matchScore: 82,
+    matchScore: 88,
     isNew: true,
-    description: "יועץ/ת מחקר ב-Transparency International בברלין. פיתוח חומרי מחקר ואימון בתחום מניעת שחיתות לאנשי פיתוח ו-NGOs. שפת עבודה: אנגלית בלבד (ספרדית/צרפתית/ערבית – יתרון). משרה מלאה לתקופה של 30 חודשים. שכר: 55,650€ לשנה. שימי לב: תאריך תחילת העבודה היה ינואר 2026 – ייתכן שהמשרה כבר אוישה."
+    description: "ייעוץ מחקרי בנושא מניעת שחיתות, פיתוח חומרי הדרכה ומחקר מבוסס ראיות. שפת עבודה אנגלית, משכורת מ-55,650 אירו ברוטו לשנה. חוזה ל-30 חודשים."
   },
   {
     id: 2,
-    title: "Expert Communications and Engagement – Anticipatory Action (50%)",
-    company: "Welthungerhilfe",
+    title: "Policy Advisor, Development Investments (m/f/d)",
+    company: "Transparency International",
     category: "ngo",
-    url: "https://www.idealist.org/en/nonprofit-job/0e5c8bdea88740608ca7be8fcaccec81-expert-communications-and-engagement-anticipatory-action-welthungerhilfe-bonn",
-    location: "ברלין / בון",
-    type: "50%",
+    url: "https://www.impactpool.org/jobs/1183455",
+    location: "ברלין",
+    type: "משרה מלאה",
     remote: false,
-    dateFound: "2026-04-07",
-    datePublished: "2026-03-20",
-    deadline: "2026-04-13",
-    matchScore: 76,
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-01",
+    deadline: null,
+    matchScore: 90,
     isNew: true,
-    description: "מומחה/ית תקשורת ומעורבות ב-Welthungerhilfe (50% משרה). פיתוח אסטרטגיות תקשורת לפעולה הומניטרית מניעתית (WAHAFA) ברמה גלובלית. אנגלית חובה, צרפתית – יתרון. ברלין או בון. חוזה עד אפריל 2029 עם אפשרות להארכה. דד-ליין: 13.4.2026 – עדיין פתוח!"
+    description: "ייעוץ מדיניות נגד שחיתות עבור מוסדות פיתוח בינלאומיים. עבודה בצוות Policy & Advocacy, שפת עבודה אנגלית. התאמה גבוהה לניסיון במדיניות ואדבוקסי."
   },
   {
     id: 3,
+    title: "Research Coordinator (m/f/d)",
+    company: "Transparency International",
+    category: "ngo",
+    url: "https://www.impactpool.org/jobs/1196267",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-15",
+    deadline: null,
+    matchScore: 85,
+    isNew: true,
+    description: "תיאום מחקר במזכירות הבינלאומית של Transparency International בברלין. דורש ניסיון בניהול פרויקטי מחקר ושפת עבודה אנגלית."
+  },
+  {
+    id: 4,
+    title: "Policy and Advocacy Lead, Corrupt Money Flows (m/f/d)",
+    company: "Transparency International",
+    category: "ngo",
+    url: "https://www.tbd.community/en/policy-and-advocacy-lead-corrupt-money-flows-mfd",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: null,
+    deadline: null,
+    matchScore: 92,
+    isNew: true,
+    description: "הובלת מדיניות ואדבוקסי בנושא זרימות כספים מושחתות, שקיפות בעלות, הלבנת הון. משכורת מ-55,650 אירו. התאמה מצוינת לניסיון במשפט בינלאומי ומדיניות."
+  },
+  {
+    id: 5,
+    title: "Grants Manager (all genders), 90-100%",
+    company: "Allianz Foundation",
+    category: "ngo",
+    url: "https://allianzfoundation.org/de/stellenausschreibung-grants-manager/",
+    location: "ברלין",
+    type: "90-100%",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-20",
+    deadline: "2026-04-14",
+    matchScore: 84,
+    isNew: true,
+    description: "ניהול מענקים בקרן אליאנץ, Pariser Platz בברלין. תחילת עבודה 1 ביוני 2026. אפשרות ל-90% משרה. דד-ליין להגשה: 14 באפריל 2026!"
+  },
+  {
+    id: 6,
+    title: "Policy and Advocacy Specialist, Berlin Office (P-3)",
+    company: "UNFPA - United Nations Population Fund",
+    category: "ngo",
+    url: "https://www.unfpa.org/jobs/policy-and-advocacy-specialist-berlin-representation-office-division-external-relations-berlin",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: null,
+    deadline: null,
+    matchScore: 93,
+    isNew: true,
+    description: "מומחית מדיניות ואדבוקסי במשרד UNFPA בברלין. ליידע ולקדם מול ממשלות, פרלמנטרים, ארגונים לא ממשלתיים ומגזר פרטי בגרמניה, אוסטריה ומדינות מרכז אירופה. דרגת P-3 באו\"ם."
+  },
+  {
+    id: 7,
+    title: "Program Associate - MENA",
+    company: "Access Now",
+    category: "ngo",
+    url: "https://unjobs.org/vacancies/1730157289796",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: null,
+    deadline: null,
+    matchScore: 80,
+    isNew: true,
+    description: "סיוע לצוות מדיניות ואדבוקסי למזרח התיכון וצפון אפריקה, תיאום פנים-ארגוני, תקשורת עם שותפים. דורש הבנה של סוגיות אינטרנט וזכויות דיגיטליות באזור MENA."
+  },
+  {
+    id: 8,
+    title: "Director, German Representation Office",
+    company: "UNDP - United Nations Development Programme",
+    category: "ngo",
+    url: "https://unjobs.org/vacancies/1773383905312",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-15",
+    deadline: "2026-04-01",
+    matchScore: 82,
+    isNew: true,
+    description: "ניהול משרד הייצוג של UNDP בגרמניה. תפקיד בכיר ברמת P-5, דורש ניסיון רב בפיתוח בינלאומי ויחסים עם ממשלות."
+  },
+  {
+    id: 9,
+    title: "Wissenschaftliche*r Mitarbeiter*in - Monitoring Mechanism GEAS",
+    company: "German Institute for Human Rights",
+    category: "ngo",
+    url: "https://www.institut-fuer-menschenrechte.de/en/institute/careers",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-25",
+    deadline: "2026-04-12",
+    matchScore: 78,
+    isNew: true,
+    description: "עבודת מחקר במנגנון ניטור מערכת המקלט האירופית המשותפת (GEAS). מכון זכויות אדם הגרמני בברלין. דד-ליין: 12 באפריל! ייתכן שנדרשת גרמנית - יש לבדוק."
+  },
+  {
+    id: 10,
+    title: "Team Lead - Monitoring Mechanism GEAS",
+    company: "German Institute for Human Rights",
+    category: "ngo",
+    url: "https://www.institut-fuer-menschenrechte.de/en/institute/careers",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-28",
+    deadline: "2026-04-21",
+    matchScore: 80,
+    isNew: true,
+    description: "ראש צוות ניטור מערכת המקלט האירופית המשותפת. תפקיד ניהולי במכון זכויות אדם הגרמני. דד-ליין: 21 באפריל. ייתכן שנדרשת גרמנית - יש לבדוק."
+  },
+  {
+    id: 11,
+    title: "Project Manager - RPS Department (all genders)",
+    company: "Berghof Foundation",
+    category: "ngo",
+    url: "https://berghof-foundation-operations-ggmbh.jobs.personio.de/job/2552326",
+    location: "ברלין",
+    type: "משרה מלאה (39 שעות)",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-10",
+    deadline: "2026-03-30",
+    matchScore: 85,
+    isNew: true,
+    description: "ניהול פרויקטים במחלקת תמיכה אזורית לשלום (Regional Peace Support). חוזה לשנה. קרן ברגהוף לבניית שלום וטרנספורמציה של סכסוכים."
+  },
+  {
+    id: 12,
     title: "Project Officer (all genders)",
     company: "Berghof Foundation",
     category: "ngo",
     url: "https://berghof-foundation-operations-ggmbh.jobs.personio.de/job/2555959",
     location: "ברלין",
-    type: "משרה מלאה",
+    type: "משרה מלאה (39 שעות)",
     remote: false,
-    dateFound: "2026-04-07",
-    datePublished: "2026-03-01",
+    dateFound: "2026-04-09",
+    datePublished: "2026-03-12",
     deadline: "2026-03-25",
-    matchScore: 74,
+    matchScore: 82,
     isNew: true,
-    description: "קצין/ת פרויקט ב-Berghof Foundation בברלין. עבודה בתחום בנייה ושמירה על שלום, פתרון קונפליקטים ומדיניות בינלאומית. אנגלית C1 חובה. משרה מלאה (39 ש'/שבוע), חוזה מוגבל עד מרץ 2027. שים לב: הדד-ליין כנראה פג (25.3.2026) – בדקי אם עדיין פתוח."
+    description: "קצינת פרויקטים במחלקת תמיכה אזורית לשלום. חוזה עד מרץ 2027, דרגת שכר E10. קרן ברגהוף, ברלין."
   },
   {
-    id: 4,
-    title: "Project Manager – RPS Department (all genders)",
-    company: "Berghof Foundation",
-    category: "ngo",
-    url: "https://berghof-foundation-operations-ggmbh.jobs.personio.de/job/2552326",
+    id: 13,
+    title: "Compliance Outsourcing Manager",
+    company: "Wolt",
+    category: "tech",
+    url: "https://www.arbeitnow.com/jobs/companies/wolt-english/compliance-outsourcing-manager-berlin-296003",
     location: "ברלין",
     type: "משרה מלאה",
     remote: false,
-    dateFound: "2026-04-07",
-    datePublished: "2026-03-01",
-    deadline: "2026-03-30",
-    matchScore: 76,
+    dateFound: "2026-04-09",
+    datePublished: null,
+    deadline: null,
+    matchScore: 72,
     isNew: true,
-    description: "מנהל/ת פרויקט במחלקת שלום אזורי (RPS) ב-Berghof Foundation בברלין. מיקוד בתהליכי שלום ופיוס בינלאומי. אנגלית C1 חובה. משרה מלאה (39 ש'), חוזה לשנה. שים לב: הדד-ליין כנראה פג (30.3.2026) – בדקי אם עדיין פתוח."
+    description: "ניהול ציות ומיקור חוץ בוולט ברלין. דורש 4+ שנות ניסיון בציות, ניהול סיכונים או מיקור חוץ. שפת עבודה אנגלית, ללא דרישה לגרמנית."
   },
   {
-    id: 5,
-    title: "Communications and Media Specialist",
-    company: "Transparency International",
+    id: 14,
+    title: "Program Assistant, Geostrategy",
+    company: "German Marshall Fund (GMF)",
     category: "ngo",
-    url: "https://www.transparency.org/en/career-tender-opportunities",
-    location: "ברלין (היברידי)",
+    url: "https://unjobs.org/vacancies/1734093853222",
+    location: "ברלין",
     type: "משרה מלאה",
-    remote: true,
-    dateFound: "2026-04-07",
-    datePublished: "2026-02-20",
-    deadline: "2026-03-16",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: null,
+    deadline: null,
+    matchScore: 76,
+    isNew: true,
+    description: "סיוע בתוכניות גיאו-אסטרטגיה בקרן מרשל הגרמנית, ברלין. ארגון בינלאומי העוסק בקשר טרנסאטלנטי."
+  },
+  {
+    id: 15,
+    title: "Enterprise Account Manager (Hebrew Speaking)",
+    company: "Adyen",
+    category: "tech",
+    url: "https://www.glassdoor.com/Job/berlin-hebrew-jobs-SRCH_IL.0,6_IC2622109_KO7,13.htm",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: null,
+    deadline: null,
+    matchScore: 70,
+    isNew: true,
+    description: "ניהול לקוחות ארגוניים דוברי עברית בחברת תשלומים בינלאומית. שפת עבודה עברית ואנגלית, ללא דרישה לגרמנית."
+  },
+  {
+    id: 16,
+    title: "SEEK Development - Initiative Application (Consultant/Project Manager)",
+    company: "SEEK Development",
+    category: "ngo",
+    url: "https://unjobs.org/vacancies/1775327912786",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: "2026-04-02",
+    deadline: null,
+    matchScore: 83,
+    isNew: true,
+    description: "הגשת מועמדות יזומה ל-SEEK Development - ייעוץ אסטרטגי בתחום הפיתוח הבינלאומי. תפקידי יועץ, יועץ בכיר ומנהל פרויקטים. שפת עבודה אנגלית."
+  },
+  {
+    id: 17,
+    title: "Recruiter*in (d/w/m)",
+    company: "IRC - International Rescue Committee",
+    category: "ngo",
+    url: "https://unjobs.org/vacancies/1775143589773",
+    location: "ברלין",
+    type: "משרה מלאה",
+    remote: false,
+    dateFound: "2026-04-09",
+    datePublished: "2026-04-01",
+    deadline: null,
     matchScore: 71,
     isNew: true,
-    description: "מומחה/ית תקשורת ומדיה ב-Transparency International. ניהול אסטרטגיית תקשורת, יחסי ציבור וקמפיינים. שפת עבודה: אנגלית. 4 ימים לפחות בחודש במשרד ברלין. שים לב: הדד-ליין פג (16.3.2026)."
+    description: "גיוס עובדים ב-IRC גרמניה, ברלין. ועדת ההצלה הבינלאומית - ארגון סיוע הומניטרי. ייתכן שנדרשת גרמנית - יש לבדוק."
+  },
+  {
+    id: 18,
+    title: "Head of Project - Child Growth Monitor",
+    company: "Welthungerhilfe",
+    category: "ngo",
+    url: "https://reliefweb.int/job/3998789/head-project-child-growth-monitor",
+    location: "ברלין / עבודה מהבית",
+    type: "משרה מלאה",
+    remote: true,
+    dateFound: "2026-04-09",
+    datePublished: null,
+    deadline: null,
+    matchScore: 75,
+    isNew: true,
+    description: "ניהול פרויקט Child Growth Monitor ב-Welthungerhilfe. עבודה מהבית עם פגישות במשרדי בון וברלין. דורש 3-4 שנות ניסיון."
   }
 ];
 
-const CATEGORY_LABELS = {
-  ngo: { label: "NGO / מדיניות", color: "#6366f1", bg: "#eef2ff" },
-  social: { label: "חברתי / תקשורת", color: "#0891b2", bg: "#ecfeff" },
-  education: { label: "חינוך / מחקר", color: "#059669", bg: "#ecfdf5" }
-};
-
-function MatchBar({ score }) {
-  const color = score >= 85 ? "#16a34a" : score >= 75 ? "#ca8a04" : "#3b82f6";
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
-      <div style={{ flex: 1, height: 8, background: "#e5e7eb", borderRadius: 4, overflow: "hidden" }}>
-        <div style={{ width: `${score}%`, height: "100%", background: color, borderRadius: 4, transition: "width 0.4s" }} />
-      </div>
-      <span style={{ fontSize: 13, fontWeight: 700, color, minWidth: 32 }}>{score}%</span>
-    </div>
-  );
-}
-
-function JobCard({ job, onHide }) {
-  const [expanded, setExpanded] = useState(false);
-  const cat = CATEGORY_LABELS[job.category] || CATEGORY_LABELS.ngo;
-  const isExpired = job.deadline && new Date(job.deadline) < new Date("2026-04-07");
-
-  return (
-    <div style={{
-      background: "white",
-      borderRadius: 14,
-      border: `2px solid ${isExpired ? "#e5e7eb" : job.isNew ? "#6366f1" : "#e5e7eb"}`,
-      padding: "18px 20px",
-      marginBottom: 16,
-      boxShadow: isExpired ? "none" : "0 2px 12px rgba(99,102,241,0.08)",
-      opacity: isExpired ? 0.7 : 1,
-      position: "relative"
-    }}>
-      {job.isNew && !isExpired && (
-        <span style={{
-          position: "absolute", top: 14, left: 14,
-          background: "#6366f1", color: "white",
-          fontSize: 11, fontWeight: 700,
-          padding: "2px 8px", borderRadius: 20
-        }}>חדש ✨</span>
-      )}
-      {isExpired && (
-        <span style={{
-          position: "absolute", top: 14, left: 14,
-          background: "#e5e7eb", color: "#6b7280",
-          fontSize: 11, fontWeight: 700,
-          padding: "2px 8px", borderRadius: 20
-        }}>פג תוקף</span>
-      )}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 4 }}>
-            <span style={{
-              background: cat.bg, color: cat.color,
-              fontSize: 11, fontWeight: 700,
-              padding: "2px 8px", borderRadius: 20
-            }}>{cat.label}</span>
-            <span style={{
-              background: "#f3f4f6", color: "#374151",
-              fontSize: 11, padding: "2px 8px", borderRadius: 20
-            }}>{job.type}</span>
-            {job.remote && (
-              <span style={{
-                background: "#ecfdf5", color: "#059669",
-                fontSize: 11, padding: "2px 8px", borderRadius: 20
-              }}>היברידי</span>
-            )}
-          </div>
-          <h3 style={{ fontSize: 17, fontWeight: 700, color: "#1e293b", marginBottom: 2 }}>{job.title}</h3>
-          <p style={{ fontSize: 14, color: "#6366f1", fontWeight: 600 }}>{job.company}</p>
-          <p style={{ fontSize: 13, color: "#64748b", marginTop: 2 }}>📍 {job.location}</p>
-        </div>
-        <div style={{ textAlign: "left", minWidth: 90 }}>
-          <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 4 }}>התאמה</div>
-          <MatchBar score={job.matchScore} />
-        </div>
-      </div>
-
-      {job.deadline && (
-        <div style={{
-          marginTop: 10,
-          padding: "6px 12px",
-          background: isExpired ? "#f9fafb" : "#fef9c3",
-          borderRadius: 8,
-          fontSize: 13,
-          color: isExpired ? "#9ca3af" : "#854d0e",
-          fontWeight: 600
-        }}>
-          {isExpired ? "🔴 דד-ליין פג: " : "⏰ דד-ליין: "}{job.deadline}
-        </div>
-      )}
-
-      <div style={{
-        marginTop: 10,
-        fontSize: 13,
-        color: "#64748b",
-        lineHeight: 1.6,
-        display: expanded ? "block" : "-webkit-box",
-        WebkitLineClamp: 2,
-        WebkitBoxOrient: "vertical",
-        overflow: expanded ? "visible" : "hidden",
-        cursor: "pointer"
-      }}
-        onClick={() => setExpanded(!expanded)}
-      >
-        {job.description}
-      </div>
-      {!expanded && (
-        <button onClick={() => setExpanded(true)} style={{
-          background: "none", border: "none", color: "#6366f1",
-          fontSize: 13, cursor: "pointer", padding: "4px 0", fontWeight: 600
-        }}>קראי עוד ▾</button>
-      )}
-
-      <div style={{ display: "flex", gap: 8, marginTop: 14, flexWrap: "wrap" }}>
-        <a href={job.url} target="_blank" rel="noopener noreferrer" style={{
-          background: isExpired ? "#f3f4f6" : "#6366f1",
-          color: isExpired ? "#6b7280" : "white",
-          padding: "8px 18px", borderRadius: 8,
-          fontSize: 14, fontWeight: 700, textDecoration: "none",
-          display: "inline-block"
-        }}>
-          {isExpired ? "📋 צפי בפרטים" : "📨 הגישי מועמדות"}
-        </a>
-        <button onClick={() => onHide(job.id)} style={{
-          background: "#f8fafc", border: "1px solid #e2e8f0",
-          color: "#64748b", padding: "8px 14px",
-          borderRadius: 8, fontSize: 13, cursor: "pointer"
-        }}>הסתרי ✕</button>
-      </div>
-      <div style={{ fontSize: 11, color: "#94a3b8", marginTop: 10, textAlign: "left" }}>
-        נמצא: {job.dateFound}
-        {job.datePublished && ` | פורסם: ${job.datePublished}`}
-      </div>
-    </div>
-  );
-}
+const QUOTES = [
+  "\"הדרך הטובה ביותר לחזות את העתיד היא ליצור אותו.\" — פיטר דרוקר",
+  "\"כל מומחה פעם היה מתחיל.\" — הלן הייז",
+  "\"ההצלחה היא לא סופית, הכישלון אינו קטלני: האומץ להמשיך הוא מה שחשוב.\" — וינסטון צ'רצ'יל",
+  "\"אל תחכי להזדמנות. צרי אותה.\" — ג'ורג' ברנרד שו",
+  "\"הכישרון שלך קובע מה את יכולה לעשות. המוטיבציה שלך קובעת כמה את מוכנה לעשות. הגישה שלך קובעת כמה טוב את עושה את זה.\" — לו הולץ",
+  "\"כל יום הוא הזדמנות חדשה. את יכולה לבנות על אתמול, או לשים את זה מאחור ולהתחיל מחדש. זה מה שמחר בשבילו.\" — בוב מרלי",
+  "\"אי אפשר לחזור אחורה ולשנות את ההתחלה, אבל אפשר להתחיל מאיפה שאת ולשנות את הסוף.\" — סי.אס. לואיס"
+];
 
 function App() {
-  const [hiddenIds, setHiddenIds] = useState(() => {
-    try {
-      return JSON.parse(window._hiddenJobs || "[]");
-    } catch { return []; }
+  const [filter, setFilter] = React.useState("all");
+  const [search, setSearch] = React.useState("");
+  const [hiddenJobs, setHiddenJobs] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem("hiddenJobs") || "[]"); } catch { return []; }
   });
-  const [filter, setFilter] = useState("all");
-  const [showHidden, setShowHidden] = useState(false);
-  const [quoteIdx] = useState(() => Math.floor(Math.random() * INSPIRATIONAL_QUOTES.length));
+  const [cvSent, setCvSent] = React.useState(() => {
+    try { return JSON.parse(localStorage.getItem("cvSent") || "[]"); } catch { return []; }
+  });
+  const [showHidden, setShowHidden] = React.useState(false);
 
-  const quote = INSPIRATIONAL_QUOTES[quoteIdx];
+  const todayQuote = QUOTES[new Date().getDay() % QUOTES.length];
 
-  const hideJob = (id) => setHiddenIds(prev => [...prev, id]);
-  const unhideJob = (id) => setHiddenIds(prev => prev.filter(h => h !== id));
-
-  const visibleJobs = JOBS.filter(j => !hiddenIds.includes(j.id));
-  const hiddenJobs = JOBS.filter(j => hiddenIds.includes(j.id));
-
-  const filtered = filter === "all" ? visibleJobs
-    : filter === "open" ? visibleJobs.filter(j => !j.deadline || new Date(j.deadline) >= new Date("2026-04-07"))
-    : filter === "new" ? visibleJobs.filter(j => j.isNew)
-    : visibleJobs.filter(j => j.category === filter);
-
-  const stats = {
-    total: JOBS.length,
-    open: JOBS.filter(j => !j.deadline || new Date(j.deadline) >= new Date("2026-04-07")).length,
-    highMatch: JOBS.filter(j => j.matchScore >= 80).length,
-    new: JOBS.filter(j => j.isNew).length,
+  const toggleHide = (id) => {
+    const next = hiddenJobs.includes(id) ? hiddenJobs.filter(x => x !== id) : [...hiddenJobs, id];
+    setHiddenJobs(next);
+    try { localStorage.setItem("hiddenJobs", JSON.stringify(next)); } catch {}
   };
 
+  const toggleCv = (id) => {
+    const next = cvSent.includes(id) ? cvSent.filter(x => x !== id) : [...cvSent, id];
+    setCvSent(next);
+    try { localStorage.setItem("cvSent", JSON.stringify(next)); } catch {}
+  };
+
+  const filteredJobs = JOBS.filter(job => {
+    if (!showHidden && hiddenJobs.includes(job.id)) return false;
+    if (filter !== "all" && job.category !== filter) return false;
+    if (search) {
+      const s = search.toLowerCase();
+      return job.title.toLowerCase().includes(s) || job.company.toLowerCase().includes(s) || job.description.includes(s);
+    }
+    return true;
+  });
+
+  const categories = { all: "הכל", ngo: "NGO / בינלאומי", social: "חברתי", education: "חינוך", tech: "טכנולוגיה" };
+
+  const scoreClass = (s) => s >= 85 ? "score-high" : s >= 75 ? "score-medium" : "score-low";
+  const catClass = (c) => `cat-${c}`;
+  const catLabel = { ngo: "NGO / בינלאומי", social: "חברתי", education: "חינוך", tech: "טכנולוגיה", other: "אחר" };
+
+  const activeCount = JOBS.filter(j => !hiddenJobs.includes(j.id)).length;
+  const newCount = JOBS.filter(j => j.isNew && !hiddenJobs.includes(j.id)).length;
+  const cvCount = cvSent.length;
+  const urgentCount = JOBS.filter(j => {
+    if (!j.deadline || hiddenJobs.includes(j.id)) return false;
+    const d = new Date(j.deadline);
+    const now = new Date();
+    return (d - now) / (1000*60*60*24) <= 14 && d >= now;
+  }).length;
+
   return (
-    <div style={{ maxWidth: 860, margin: "0 auto", padding: "24px 16px" }}>
-      {/* Header */}
-      <div style={{
-        background: "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
-        borderRadius: 20, padding: "28px 32px", marginBottom: 24,
-        color: "white", boxShadow: "0 8px 30px rgba(99,102,241,0.3)"
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
-          <div>
-            <h1 style={{ fontSize: 26, fontWeight: 800, marginBottom: 4 }}>🔍 לוח משרות – מיכל זיו</h1>
-            <p style={{ opacity: 0.85, fontSize: 15 }}>ברלין 2026 | זכויות אדם • מדיניות • NGO • ניהול</p>
-            <p style={{ opacity: 0.7, fontSize: 12, marginTop: 6 }}>עודכן לאחרונה: {LAST_UPDATED}</p>
-          </div>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            {[
-              { label: "סה\"כ", value: stats.total, color: "rgba(255,255,255,0.2)" },
-              { label: "פתוחות", value: stats.open, color: "rgba(52,211,153,0.3)" },
-              { label: "התאמה גבוהה", value: stats.highMatch, color: "rgba(251,191,36,0.3)" },
-              { label: "חדשות", value: stats.new, color: "rgba(167,139,250,0.3)" }
-            ].map(s => (
-              <div key={s.label} style={{
-                background: s.color, borderRadius: 12,
-                padding: "10px 16px", textAlign: "center", minWidth: 70
-              }}>
-                <div style={{ fontSize: 24, fontWeight: 800 }}>{s.value}</div>
-                <div style={{ fontSize: 11, opacity: 0.9 }}>{s.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Quote */}
-      <div style={{
-        background: "white", borderRadius: 14, padding: "18px 24px",
-        marginBottom: 20, borderRight: "4px solid #6366f1",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)"
-      }}>
-        <p style={{ fontSize: 15, color: "#374151", fontStyle: "italic", lineHeight: 1.6 }}>
-          💬 "{quote.text}"
-        </p>
-        <p style={{ fontSize: 13, color: "#6366f1", fontWeight: 700, marginTop: 6 }}>— {quote.author}</p>
-      </div>
-
-      {/* Filters */}
-      <div style={{ display: "flex", gap: 8, marginBottom: 20, flexWrap: "wrap" }}>
-        {[
-          { key: "all", label: "הכל" },
-          { key: "open", label: "⏰ פתוחות" },
-          { key: "new", label: "✨ חדשות" },
-          { key: "ngo", label: "🌍 NGO" },
-          { key: "social", label: "💙 חברתי" },
-          { key: "education", label: "📚 חינוך" }
-        ].map(f => (
-          <button key={f.key} onClick={() => setFilter(f.key)} style={{
-            padding: "8px 16px", borderRadius: 20, fontSize: 13, fontWeight: 600,
-            cursor: "pointer", transition: "all 0.2s",
-            background: filter === f.key ? "#6366f1" : "white",
-            color: filter === f.key ? "white" : "#4b5563",
-            border: `2px solid ${filter === f.key ? "#6366f1" : "#e5e7eb"}`
-          }}>{f.label}</button>
-        ))}
-      </div>
-
-      {/* Jobs List */}
-      {filtered.length === 0 ? (
-        <div style={{
-          textAlign: "center", padding: "60px 20px",
-          background: "white", borderRadius: 14, color: "#94a3b8"
-        }}>
-          <div style={{ fontSize: 48, marginBottom: 12 }}>🔍</div>
-          <p style={{ fontSize: 16 }}>לא נמצאו משרות בקטגוריה זו</p>
-        </div>
-      ) : (
-        filtered.map(job => (
-          <JobCard key={job.id} job={job} onHide={hideJob} />
-        ))
-      )}
-
-      {/* Hidden jobs section */}
-      {hiddenJobs.length > 0 && (
-        <div style={{ marginTop: 24 }}>
-          <button onClick={() => setShowHidden(!showHidden)} style={{
-            background: "none", border: "1px solid #d1d5db",
-            borderRadius: 8, padding: "8px 16px",
-            fontSize: 13, color: "#6b7280", cursor: "pointer"
-          }}>
-            {showHidden ? "▲ הסתרי" : "▼ הצגי"} משרות מוסתרות ({hiddenJobs.length})
-          </button>
-          {showHidden && hiddenJobs.map(job => (
-            <div key={job.id} style={{
-              background: "#f9fafb", borderRadius: 10, padding: "12px 16px",
-              marginTop: 8, display: "flex", justifyContent: "space-between",
-              alignItems: "center", gap: 12
-            }}>
-              <div>
-                <span style={{ fontWeight: 600, fontSize: 14, color: "#374151" }}>{job.title}</span>
-                <span style={{ color: "#94a3b8", fontSize: 13 }}> | {job.company}</span>
-              </div>
-              <button onClick={() => unhideJob(job.id)} style={{
-                background: "#6366f1", color: "white",
-                border: "none", borderRadius: 6,
-                padding: "6px 12px", fontSize: 12,
-                cursor: "pointer"
-              }}>שחזרי</button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Profile summary */}
-      <div style={{
-        background: "white", borderRadius: 14, padding: "20px 24px",
-        marginTop: 24, borderTop: "3px solid #6366f1"
-      }}>
-        <h3 style={{ fontWeight: 700, marginBottom: 12, color: "#1e293b" }}>👤 פרופיל חיפוש</h3>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          {[
-            { label: "ניסיון", value: "10+ שנים | זכויות אדם, מדיניות, NGO" },
-            { label: "שפות", value: "עברית (שפת אם) | אנגלית (שוטפת) | צרפתית (טוב)" },
-            { label: "מיקום", value: "ברלין, גרמניה" },
-            { label: "העדפת העסקה", value: "80% / Teilzeit (9:00–15:00) – גם משרה מלאה" },
-            { label: "גרמנית", value: "❌ לא נדרשת" },
-            { label: "תלוש שכר", value: "✅ Gehaltsabrechnung גרמני נדרש" }
-          ].map(item => (
-            <div key={item.label}>
-              <div style={{ fontSize: 11, color: "#94a3b8", fontWeight: 700, marginBottom: 2 }}>{item.label}</div>
-              <div style={{ fontSize: 14, color: "#374151" }}>{item.value}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div style={{ textAlign: "center", marginTop: 20, fontSize: 12, color: "#94a3b8" }}>
-        מופעל על ידי Claude AI 🤖 | מחפש כל יום משרות חדשות עבור מיכל
-      </div>
-    </div>
+    React.createElement(React.Fragment, null,
+      React.createElement("div", { className: "header" },
+        React.createElement("div", null,
+          React.createElement("h1", null, "לוח המשרות של מיכל"),
+          React.createElement("div", { className: "subtitle" }, "חיפוש עבודה בברלין | זכויות אדם, מדיניות, אדבוקסי, NGO")
+        ),
+        React.createElement("div", { className: "date" }, "עדכון אחרון: " + LAST_UPDATED)
+      ),
+      React.createElement("div", { className: "container" },
+        React.createElement("div", { className: "stats-bar" },
+          React.createElement("div", { className: "stat-card" },
+            React.createElement("div", { className: "number" }, activeCount),
+            React.createElement("div", { className: "label" }, "משרות פעילות")
+          ),
+          React.createElement("div", { className: "stat-card" },
+            React.createElement("div", { className: "number", style: { color: "#f5576c" } }, newCount),
+            React.createElement("div", { className: "label" }, "חדשות היום")
+          ),
+          React.createElement("div", { className: "stat-card" },
+            React.createElement("div", { className: "number", style: { color: "#81c784" } }, cvCount),
+            React.createElement("div", { className: "label" }, "קו\"ח נשלחו")
+          ),
+          React.createElement("div", { className: "stat-card" },
+            React.createElement("div", { className: "number", style: { color: "#ffb74d" } }, urgentCount),
+            React.createElement("div", { className: "label" }, "דד-ליין קרוב")
+          )
+        ),
+        React.createElement("div", { className: "filters" },
+          Object.entries(categories).map(([key, label]) =>
+            React.createElement("button", {
+              key: key,
+              className: "filter-btn" + (filter === key ? " active" : ""),
+              onClick: () => setFilter(key)
+            }, label)
+          ),
+          React.createElement("input", {
+            className: "search-input",
+            placeholder: "חיפוש...",
+            value: search,
+            onChange: (e) => setSearch(e.target.value)
+          }),
+          React.createElement("button", {
+            className: "toggle-hidden",
+            onClick: () => setShowHidden(!showHidden)
+          }, showHidden ? "הסתר מוסתרות" : "הצג מוסתרות (" + hiddenJobs.length + ")")
+        ),
+        filteredJobs.length === 0
+          ? React.createElement("div", { className: "empty-state" },
+              React.createElement("div", { className: "emoji" }, "🔍"),
+              React.createElement("p", null, "לא נמצאו משרות מתאימות לסינון הנוכחי")
+            )
+          : React.createElement("div", { className: "jobs-grid" },
+              filteredJobs
+                .sort((a, b) => b.matchScore - a.matchScore)
+                .map(job =>
+                  React.createElement("div", {
+                    key: job.id,
+                    className: "job-card" + (hiddenJobs.includes(job.id) ? " hidden-card" : "")
+                  },
+                    job.isNew && React.createElement("span", { className: "new-badge" }, "חדש!"),
+                    React.createElement("span", { className: "match-score " + scoreClass(job.matchScore) }, job.matchScore + "% התאמה"),
+                    React.createElement("span", { className: "category-tag " + catClass(job.category) }, catLabel[job.category] || job.category),
+                    React.createElement("h3", null, job.title),
+                    React.createElement("div", { className: "company" }, job.company),
+                    React.createElement("div", { className: "description" }, job.description),
+                    React.createElement("div", { className: "meta" },
+                      React.createElement("span", null, "📍 " + job.location),
+                      React.createElement("span", null, "⏰ " + job.type),
+                      job.remote && React.createElement("span", null, "🏠 עבודה מרחוק"),
+                      job.deadline && React.createElement("span", { style: { color: "#ffb74d" } }, "⚠️ דד-ליין: " + job.deadline)
+                    ),
+                    React.createElement("div", { className: "actions" },
+                      React.createElement("a", { className: "btn-apply", href: job.url, target: "_blank", rel: "noopener" }, "הגשת מועמדות"),
+                      React.createElement("button", {
+                        className: "btn-cv" + (cvSent.includes(job.id) ? " sent" : ""),
+                        onClick: () => toggleCv(job.id)
+                      }, cvSent.includes(job.id) ? "✓ קו\"ח נשלח" : "סמן קו\"ח"),
+                      React.createElement("button", {
+                        className: "btn-hide",
+                        onClick: () => toggleHide(job.id)
+                      }, hiddenJobs.includes(job.id) ? "הצג" : "הסתר")
+                    )
+                  )
+                )
+            ),
+        React.createElement("div", { className: "quote-bar" }, todayQuote)
+      )
+    )
   );
 }
 
-ReactDOM.render(<App />, document.getElementById("root"));
+ReactDOM.render(React.createElement(App), document.getElementById("root"));
 </script>
 </body>
 </html>
