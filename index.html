@@ -3,502 +3,308 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>דשבורד חיפוש עבודה - מיכל זיו</title>
+<title>דשבורד חיפוש עבודה — מיכל זיו</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Heebo', sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
-    min-height: 100vh;
-    direction: rtl;
-  }
-
-  .header {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    border-bottom: 1px solid #334155;
-    padding: 20px 30px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-
-  .header h1 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #f8fafc;
-  }
-
-  .header .subtitle {
-    font-size: 14px;
-    color: #94a3b8;
-    margin-top: 4px;
-  }
-
-  .last-updated {
-    font-size: 13px;
-    color: #64748b;
-    background: #1e293b;
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid #334155;
-  }
-
-  .controls {
-    background: #1e293b;
-    padding: 15px 30px;
-    border-bottom: 1px solid #334155;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .filter-btn {
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #475569;
-    background: transparent;
-    color: #94a3b8;
-    cursor: pointer;
-    font-family: 'Heebo', sans-serif;
-    font-size: 13px;
-    transition: all 0.2s;
-  }
-
-  .filter-btn:hover { border-color: #60a5fa; color: #60a5fa; }
-  .filter-btn.active { background: #3b82f6; border-color: #3b82f6; color: white; }
-
-  .search-box {
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #475569;
-    background: #0f172a;
-    color: #e2e8f0;
-    font-family: 'Heebo', sans-serif;
-    font-size: 13px;
-    width: 220px;
-    direction: ltr;
-    text-align: right;
-  }
-
-  .search-box::placeholder { color: #64748b; }
-
-  .stats-bar {
-    display: flex;
-    gap: 15px;
-    padding: 15px 30px;
-    flex-wrap: wrap;
-  }
-
-  .stat-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 12px 20px;
-    flex: 1;
-    min-width: 140px;
-    text-align: center;
-  }
-
-  .stat-card .number { font-size: 28px; font-weight: 700; }
-  .stat-card .label { font-size: 12px; color: #94a3b8; margin-top: 2px; }
-
-  .stat-card.ngo .number { color: #34d399; }
-  .stat-card.admin .number { color: #60a5fa; }
-  .stat-card.hebrew .number { color: #f472b6; }
-  .stat-card.french .number { color: #a78bfa; }
-  .stat-card.total .number { color: #fbbf24; }
-
-  .jobs-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 16px;
-    padding: 20px 30px;
-  }
-
-  .job-card {
-    background: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 20px;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .job-card:hover { border-color: #60a5fa; transform: translateY(-2px); }
-  .job-card.hidden { display: none; }
-
-  .job-card .category-tag {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    margin-bottom: 10px;
-  }
-
-  .category-tag.ngo { background: #065f46; color: #6ee7b7; }
-  .category-tag.admin { background: #1e3a5f; color: #93c5fd; }
-  .category-tag.hebrew { background: #701a5a; color: #f9a8d4; }
-  .category-tag.social { background: #4c1d95; color: #c4b5fd; }
-
-  .job-card .new-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: #ef4444;
-    color: white;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 8px;
-    border-radius: 10px;
-  }
-
-  .job-card h3 {
-    font-size: 16px;
-    font-weight: 600;
-    color: #f1f5f9;
-    margin-bottom: 6px;
-    line-height: 1.4;
-  }
-
-  .job-card .company {
-    font-size: 14px;
-    color: #60a5fa;
-    margin-bottom: 8px;
-  }
-
-  .job-card .description {
-    font-size: 13px;
-    color: #94a3b8;
-    line-height: 1.5;
-    margin-bottom: 12px;
-  }
-
-  .job-card .meta {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    font-size: 12px;
-    color: #64748b;
-    margin-bottom: 12px;
-  }
-
-  .job-card .match-score {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .match-score.high { color: #34d399; }
-  .match-score.medium { color: #fbbf24; }
-
-  .apply-btn {
-    display: inline-block;
-    padding: 8px 20px;
-    background: #3b82f6;
-    color: white;
-    text-decoration: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 500;
-    transition: background 0.2s;
-  }
-
-  .apply-btn:hover { background: #2563eb; }
-
-  .quote-card {
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-    border: 1px solid #334155;
-    border-radius: 12px;
-    padding: 30px;
-    margin: 20px 30px;
-    text-align: center;
-  }
-
-  .quote-card .quote {
-    font-size: 18px;
-    font-style: italic;
-    color: #cbd5e1;
-    line-height: 1.6;
-  }
-
-  .quote-card .author {
-    font-size: 13px;
-    color: #64748b;
-    margin-top: 10px;
-  }
-
-  .toggle-hidden-btn {
-    padding: 8px 16px;
-    border-radius: 20px;
-    border: 1px solid #475569;
-    background: transparent;
-    color: #94a3b8;
-    cursor: pointer;
-    font-family: 'Heebo', sans-serif;
-    font-size: 13px;
-    margin-right: auto;
-  }
-
-  @media (max-width: 768px) {
-    .jobs-grid { grid-template-columns: 1fr; padding: 10px 15px; }
-    .header, .controls, .stats-bar { padding-right: 15px; padding-left: 15px; }
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f6fa; color: #2d3436; direction: rtl; padding: 20px; }
+  .header { text-align: center; margin-bottom: 30px; }
+  .header h1 { font-size: 2em; color: #2d3436; margin-bottom: 5px; }
+  .header .subtitle { color: #636e72; font-size: 0.95em; }
+  .last-updated { text-align: center; color: #636e72; font-size: 0.85em; margin-bottom: 20px; }
+  .stats { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 25px; }
+  .stat-card { background: white; border-radius: 12px; padding: 15px 25px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); min-width: 120px; }
+  .stat-card .number { font-size: 1.8em; font-weight: bold; }
+  .stat-card .label { font-size: 0.8em; color: #636e72; margin-top: 3px; }
+  .stat-ngo .number { color: #0984e3; }
+  .stat-admin .number { color: #00b894; }
+  .stat-hebrew .number { color: #6c5ce7; }
+  .stat-social .number { color: #fdcb6e; }
+  .stat-total .number { color: #d63031; }
+  .filters { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 25px; }
+  .filter-btn { padding: 8px 18px; border-radius: 20px; border: 2px solid #dfe6e9; background: white; cursor: pointer; font-size: 0.9em; transition: all 0.2s; }
+  .filter-btn:hover { border-color: #74b9ff; }
+  .filter-btn.active { background: #0984e3; color: white; border-color: #0984e3; }
+  .toggle-hidden-btn { padding: 8px 18px; border-radius: 20px; border: 2px solid #b2bec3; background: #dfe6e9; cursor: pointer; font-size: 0.9em; transition: all 0.2s; }
+  .toggle-hidden-btn.showing { background: #fdcb6e; border-color: #f39c12; }
+  .jobs-container { max-width: 900px; margin: 0 auto; }
+  .job-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-right: 4px solid #dfe6e9; transition: transform 0.2s, box-shadow 0.2s; position: relative; }
+  .job-card:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.12); }
+  .job-card.ngo { border-right-color: #0984e3; }
+  .job-card.admin { border-right-color: #00b894; }
+  .job-card.hebrew { border-right-color: #6c5ce7; }
+  .job-card.social { border-right-color: #fdcb6e; }
+  .job-card.hidden-job { opacity: 0.5; display: none; }
+  .job-card.hidden-job.show-hidden { display: block; }
+  .job-title { font-size: 1.15em; font-weight: bold; margin-bottom: 5px; }
+  .job-title a { color: #2d3436; text-decoration: none; }
+  .job-title a:hover { color: #0984e3; text-decoration: underline; }
+  .job-company { color: #636e72; font-size: 0.95em; margin-bottom: 8px; }
+  .job-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .job-tag { font-size: 0.78em; padding: 3px 10px; border-radius: 12px; background: #dfe6e9; color: #636e72; }
+  .job-tag.new { background: #55efc4; color: #00b894; font-weight: bold; }
+  .job-tag.score-high { background: #55efc4; color: #00b894; }
+  .job-tag.score-med { background: #ffeaa7; color: #fdcb6e; }
+  .job-description { font-size: 0.9em; color: #636e72; line-height: 1.5; }
+  .job-actions { margin-top: 10px; display: flex; gap: 8px; }
+  .btn-apply { padding: 6px 16px; border-radius: 8px; border: none; background: #0984e3; color: white; cursor: pointer; font-size: 0.85em; text-decoration: none; display: inline-block; }
+  .btn-apply:hover { background: #0873c4; }
+  .btn-hide { padding: 6px 16px; border-radius: 8px; border: 1px solid #dfe6e9; background: white; cursor: pointer; font-size: 0.85em; color: #636e72; }
+  .btn-hide:hover { background: #f5f6fa; }
+  .quote-card { background: linear-gradient(135deg, #a29bfe, #6c5ce7); color: white; border-radius: 12px; padding: 25px; margin-bottom: 25px; text-align: center; max-width: 900px; margin-left: auto; margin-right: auto; }
+  .quote-card p { font-size: 1.1em; line-height: 1.6; }
+  .no-results { text-align: center; color: #636e72; padding: 40px; font-size: 1.1em; }
+  @media (max-width: 600px) { .stats { flex-direction: column; align-items: center; } .job-meta { flex-direction: column; } }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div>
-    <h1>דשבורד חיפוש עבודה - מיכל זיו</h1>
-    <div class="subtitle">ברלין | אנגלית, עברית, צרפתית | ללא גרמנית</div>
-  </div>
-  <div class="last-updated" id="lastUpdated"></div>
+  <h1>🎯 דשבורד חיפוש עבודה</h1>
+  <div class="subtitle">מיכל זיו — ברלין</div>
 </div>
-
-<div class="controls">
-  <button class="filter-btn active" data-filter="all">הכל</button>
-  <button class="filter-btn" data-filter="ngo">NGO / זכויות אדם</button>
-  <button class="filter-btn" data-filter="admin">אדמיניסטרציה</button>
-  <button class="filter-btn" data-filter="hebrew">עברית</button>
-  <button class="filter-btn" data-filter="social">צרפתית</button>
-  <input type="text" class="search-box" id="searchBox" placeholder="חיפוש חופשי...">
-  <button class="toggle-hidden-btn" id="toggleHidden" onclick="toggleHidden()">הצג/הסתר משרות ישנות</button>
-</div>
-
-<div class="stats-bar" id="statsBar"></div>
+<div class="last-updated" id="lastUpdated"></div>
 
 <div class="quote-card">
-  <div class="quote">"הדרך הטובה ביותר לחזות את העתיד היא ליצור אותו."</div>
-  <div class="author">- פיטר דרוקר</div>
+  <p>💪 כל יום הוא הזדמנות חדשה. את קרובה יותר ממה שאת חושבת!</p>
 </div>
 
-<div class="jobs-grid" id="jobsGrid"></div>
+<div class="stats" id="statsContainer"></div>
+
+<div class="filters" id="filtersContainer">
+  <button class="filter-btn active" data-filter="all">הכל</button>
+  <button class="filter-btn" data-filter="ngo">🌍 NGO / מדיניות</button>
+  <button class="filter-btn" data-filter="admin">💼 אדמיניסטרציה</button>
+  <button class="filter-btn" data-filter="hebrew">🇮🇱 עברית</button>
+  <button class="filter-btn" data-filter="social">🇫🇷 צרפתית</button>
+  <button class="toggle-hidden-btn" id="toggleHidden" onclick="toggleHidden()">הצג מוסתרים</button>
+</div>
+
+<div class="jobs-container" id="jobsContainer"></div>
 
 <script>
-const LAST_UPDATED = "2026-04-11 10:00";
+const LAST_UPDATED = "2026-04-12 10:00";
 
 const JOBS = [
   {
-    id: 101, title: "Policy Advisor - Development Investments",
-    company: "Transparency International", category: "ngo",
-    url: "https://www.impactpool.org/jobs/1183455",
-    location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 90, isNew: true,
-    description: "ייעוץ מדיניות נגד שחיתות בפרויקטי פיתוח. עבודה בינלאומית באנגלית, מתאים לרקע משפטי בזכויות אדם"
-  },
-  {
-    id: 102, title: "Global Advocacy Coordinator",
-    company: "Transparency International", category: "ngo",
-    url: "https://www.impactpool.org/jobs/1021584",
-    location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 92, isNew: true,
-    description: "תיאום advocacy גלובלי, עבודה עם אסטרטגיה 2030. מתאים מאוד לניסיון בניהול צוותים ותיקים"
-  },
-  {
-    id: 103, title: "Research Advisor",
+    id: 101, title: "Research Advisor (m/f/d)",
     company: "Transparency International", category: "ngo",
     url: "https://www.impactpool.org/jobs/1182663",
     location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 85, isNew: true,
-    description: "מחקר ופרסום חומרי מדיניות על מניעת שחיתות. מתאים לרקע אקדמי ומשפטי חזק"
+    dateFound: "2026-04-12", datePublished: "2025-12", deadline: null,
+    matchScore: 88, isNew: true,
+    description: "ייעוץ מחקרי בנושא מניעת שחיתות — מתאים לרקע משפטי ומחקרי חזק. אנגלית בלבד, שכר 55,650€ ברוטו."
   },
   {
-    id: 301, title: "Social Media Content Moderator (Hebrew)",
-    company: "Majorel Berlin (Teleperformance)", category: "hebrew",
-    url: "https://majorel-berlin1.softgarden.io/job/59874400?l=en",
+    id: 102, title: "Policy Advisor, Development Investments (m/f/d)",
+    company: "Transparency International", category: "ngo",
+    url: "https://www.impactpool.org/jobs/1183455",
     location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 78, isNew: true,
-    description: "מודרטור תוכן בעברית. שכר 2,583 יורו + בונוסים. לא דורש גרמנית. כניסה מהירה לשוק העבודה"
+    dateFound: "2026-04-12", datePublished: "2025-12", deadline: null,
+    matchScore: 90, isNew: true,
+    description: "ייעוץ מדיניות אנטי-שחיתות לגופי פיתוח — מתאים מאוד לניסיון משפטי ומדיניות. עבודה באנגלית."
   },
   {
-    id: 302, title: "Content Moderator - Hebrew (m/f/d)",
-    company: "Teleperformance Germany", category: "hebrew",
-    url: "https://jobs-teleperformance.career.softgarden.de/jobs/51437088/Hebrew-Social-Media-Content-Moderator-m-f-d-/",
+    id: 103, title: "Global Advocacy Coordinator (m/f/d)",
+    company: "Transparency International", category: "ngo",
+    url: "https://www.impactpool.org/jobs/1021584",
     location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 76, isNew: true,
-    description: "מודרטור תוכן בעברית. הטבות: כרטיס תחבורה, סבסוד ארוחות. לא דורש גרמנית כלל"
+    dateFound: "2026-04-12", datePublished: "2025", deadline: null,
+    matchScore: 92, isNew: true,
+    description: "תיאום advocacy גלובלי מול G20, OECD, UN — מתאים מצוין לרקע בזכויות אדם ומדיניות בינלאומית. אנגלית + צרפתית יתרון."
   },
   {
-    id: 303, title: "Enterprise Account Manager (Hebrew Speaker)",
-    company: "Adyen", category: "hebrew",
-    url: "https://careers.adyen.com/vacancies/5776852-enterprise-account-manager-hebrew-speaker",
-    location: "Berlin", type: "Full-time (Hybrid)", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
+    id: 104, title: "Board & Council Engagement Officer (m/f/x)",
+    company: "European Council on Foreign Relations (ECFR)", category: "ngo",
+    url: "https://ecfr.jobs.personio.com/?language=en",
+    location: "Berlin / London", type: "Full-time", remote: false,
+    dateFound: "2026-04-12", datePublished: "2026-04", deadline: null,
     matchScore: 82, isNew: true,
-    description: "ניהול לקוחות אנטרפרייז בתעשיית התשלומים. דורש עברית ואנגלית, גרמנית יתרון בלבד"
+    description: "ניהול קשרי בעלי עניין ב-ECFR — דורש תואר ביחסים בינלאומיים ו-4+ שנות ניסיון. עבודה באנגלית."
   },
   {
-    id: 304, title: "Hebrew Speaking Member Experience Specialist",
+    id: 105, title: "Project Manager (all genders) - RPS Department",
+    company: "Berghof Foundation", category: "ngo",
+    url: "https://berghof-foundation-operations-ggmbh.jobs.personio.de/job/2552326",
+    location: "Berlin", type: "Full-time (39h)", remote: false,
+    dateFound: "2026-04-12", datePublished: "2026-03", deadline: "2026-03-30",
+    matchScore: 85, isNew: true,
+    description: "ניהול פרויקטים בשלום ופתרון סכסוכים — ארגון בינלאומי בברלין. חוזה לשנה."
+  },
+  {
+    id: 106, title: "Strategic Litigation Officer / Lawyer",
+    company: "Open Society Foundations", category: "ngo",
+    url: "https://osfglobal.wd5.myworkdayjobs.com/OSF",
+    location: "Berlin", type: "Full-time", remote: false,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
+    matchScore: 95, isNew: true,
+    description: "עורך/ת דין לליטיגציה אסטרטגית בתוכנית אירופה — מתאים מושלם לרקע משפטי בזכויות אדם!"
+  },
+  {
+    id: 107, title: "Executive Assistant to COO - Europe & Central Asia",
+    company: "Open Society Foundations", category: "ngo",
+    url: "https://osfglobal.wd5.myworkdayjobs.com/OSF",
+    location: "Berlin", type: "Full-time", remote: false,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
+    matchScore: 84, isNew: true,
+    description: "עוזרת מנכ\"ל בתוכנית אירופה ומרכז אסיה — שילוב אדמיניסטרציה עם ארגון בינלאומי מוביל."
+  },
+  {
+    id: 301, title: "Hebrew Speaking Member Experience Specialist (f/m/x)",
     company: "Progyny Global", category: "hebrew",
     url: "https://www.arbeitnow.com/jobs/companies/progyny-global/hebrew-speaking-member-experience-specialist-berlin-302852",
-    location: "Berlin (Hybrid)", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
+    location: "Berlin (Mitte)", type: "Full/Part-time", remote: true,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
     matchScore: 80, isNew: true,
-    description: "ליווי חברי תוכנית בנושא פוריות ובריאות. היברידי, הטבות מצוינות. דורש עברית ואנגלית"
+    description: "ליווי מטופלות פריון בעברית — עבודה משמעותית, אנגלית + עברית בלבד. אפשרות עבודה מהבית."
   },
   {
-    id: 305, title: "Customer Service Agent (Hebrew)",
+    id: 302, title: "Enterprise Account Manager (Hebrew Speaker)",
+    company: "Adyen", category: "hebrew",
+    url: "https://careers.adyen.com/vacancies/5776852-enterprise-account-manager-hebrew-speaker",
+    location: "Berlin", type: "Full-time", remote: false,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
+    matchScore: 78, isNew: true,
+    description: "ניהול לקוחות אנטרפרייז בעברית — Adyen חברת תשלומים גלובלית. עברית + אנגלית, גרמנית יתרון בלבד."
+  },
+  {
+    id: 303, title: "Hebrew Speaking Customer Service Agent (m/f/d)",
+    company: "Concentrix", category: "hebrew",
+    url: "https://jobs.concentrix.com/kr/ko/job/R1456295/Hebrew-Speaking-Customer-Service-Agent-m-f-d",
+    location: "Berlin", type: "Full-time", remote: true,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
+    matchScore: 72, isNew: true,
+    description: "שירות לקוחות בעברית — 100% מהבית או מהמשרד בברלין. שכר 2,500€ + בונוסים."
+  },
+  {
+    id: 304, title: "Hebrew Content Moderator (m/f/d)",
+    company: "Teleperformance", category: "hebrew",
+    url: "https://jobs-teleperformance.career.softgarden.de/jobs/59874190/Hebrew-Content-Moderator-m-f-d-/",
+    location: "Berlin", type: "Full/Part-time", remote: false,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
+    matchScore: 70, isNew: true,
+    description: "מנחה תוכן בעברית ברשתות חברתיות — 2,668€ + בונוסים, בונוס רילוקיישן. עברית + אנגלית בלבד."
+  },
+  {
+    id: 305, title: "Customer Service Agent - HEBREW",
     company: "Workstation Customer Care", category: "hebrew",
     url: "https://www.arbeitnow.com/jobs/companies/workstation-customer-care/customer-service-agent-hebrew-berlin-91429",
     location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
     matchScore: 72, isNew: true,
-    description: "שירות לקוחות בעברית. כניסה מהירה לשוק, לא דורש גרמנית"
+    description: "שירות לקוחות בעברית — מתאים לדוברי עברית ואנגלית בברלין."
   },
   {
     id: 401, title: "Payroll Partner (French-Speaking)",
     company: "SumUp", category: "social",
     url: "https://www.sumup.com/careers/positions/berlin-germany/people/payroll-partner-frenchspeaking/8064676002/",
     location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 75, isNew: true,
-    description: "ניהול שכר צרפתי. דורש צרפתית ואנגלית, ללא גרמנית. חברת פינטק מובילה"
-  },
-  {
-    id: 402, title: "Legal Specialist (Data & GDPR) - French Speaker",
-    company: "Atolls", category: "social",
-    url: "https://www.arbeitnow.com/jobs/companies/atolls/legal-specialist-data-gdpr-french-speaker-berlin-259923",
-    location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 88, isNew: true,
-    description: "משפטנ/ית GDPR עם צרפתית. תפקיד משפטי מובהק, מתאים מאוד לרקע של מיכל. גרמנית יתרון בלבד"
-  },
-  {
-    id: 403, title: "Associate Admin & Payroll (France)",
-    company: "KWS SAAT SE", category: "social",
-    url: "https://jobs.kws.com/job/Berlin-Associate-Admin-&-Payroll-France-(mfd)-BE/1152037001/",
-    location: "Berlin", type: "Full-time (2 years)", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 74, isNew: true,
-    description: "ניהול שכר ואדמיניסטרציה לשוק הצרפתי. דורש צרפתית ואנגלית"
-  },
-  {
-    id: 404, title: "Officer/Advisor Payroll with French",
-    company: "BASF Services Europe", category: "social",
-    url: "https://basf.ongig.com/jobs/human-resources/berlin-germany/officer-advisor-payroll-with-french-m-f-/352464501",
-    location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 73, isNew: true,
-    description: "עיבוד שכר צרפתי, עבודה בצוות בינלאומי של 1,300+ עובדים מ-50+ מדינות"
-  },
-  {
-    id: 501, title: "Office Manager (Berlin Hub) / Executive Assistant",
-    company: "Bitpanda", category: "admin",
-    url: "https://startup.jobs/office-manager-berlin-hub-executive-assistant-bitpanda-2-5923131",
-    location: "Berlin (Hybrid)", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 80, isNew: true,
-    description: "ניהול משרד ועוזר/ת מנכ\"ל. היברידי, 60 ימי WFA בשנה. סטארטאפ פינטק בינלאומי"
-  },
-  {
-    id: 502, title: "Office Manager - Berlin",
-    company: "Kraken (Energy Tech)", category: "admin",
-    url: "https://jobs.lever.co/kraken123/cee89c66-dd27-4242-9cbc-d0316cb3e3a6",
-    location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 78, isNew: true,
-    description: "ניהול משרד, תיאום נסיעות ואירועים. חברת טכנולוגיה בינלאומית, יש לוודא דרישת גרמנית"
-  },
-  {
-    id: 503, title: "Office Manager",
-    company: "Bridger", category: "admin",
-    url: "https://join.com/companies/bridgerhq/14642471-office-manager",
-    location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
     matchScore: 76, isNew: true,
-    description: "ניהול משרד בסטארטאפ. יצירת סביבת עבודה מאורגנת ויעילה"
+    description: "ניהול שכר צרפתי ב-SumUp — דורש אנגלית שוטפת + צרפתית. ברלין, חברת פינטק גלובלית."
   },
   {
-    id: 504, title: "Executive Assistant / Office Manager",
-    company: "Lyterian", category: "admin",
-    url: "https://jobs.lever.co/lyterian/99ab7781-91f2-4d65-b725-d0b7e9e98da5",
-    location: "Berlin", type: "Full-time", remote: false,
-    dateFound: "2026-04-11", datePublished: "2026-03", deadline: null,
-    matchScore: 79, isNew: true,
-    description: "עוזר/ת מנכ\"ל ומנהל/ת משרד. חברה בינלאומית"
+    id: 501, title: "Office Manager (m/f/d)",
+    company: "Aristander.AI", category: "admin",
+    url: "https://aristander.ai/jobs/office-manager-m-f-d/",
+    location: "Berlin (Prenzlauer Berg)", type: "Part/Full-time", remote: true,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
+    matchScore: 80, isNew: true,
+    description: "ניהול משרד בסטארטאפ Travel Tech — היברידי, אווירה צעירה. לבדוק דרישות שפה."
+  },
+  {
+    id: 502, title: "Founder's Associate / Executive Assistant to CEO",
+    company: "Cygrid", category: "admin",
+    url: "https://builtin.com/job/founder-s-associate-executive-assistant-ceo/8988120",
+    location: "Berlin (Potsdamer Platz)", type: "Full-time", remote: false,
+    dateFound: "2026-04-12", datePublished: "2026", deadline: null,
+    matchScore: 82, isNew: true,
+    description: "עוזרת מנכ\"ל בסטארטאפ סייבר ישראלי — תפעול, נסיעות, PR, מכירות. היברידי בברלין."
   }
 ];
 
-// ===== APP LOGIC =====
-let activeFilter = 'all';
+// --- Render Logic ---
+const hiddenJobs = JSON.parse(localStorage.getItem('hiddenJobs') || '[]');
+let currentFilter = 'all';
 let showHidden = false;
-let searchQuery = '';
 
 function toggleHidden() {
   showHidden = !showHidden;
+  const btn = document.getElementById('toggleHidden');
+  btn.classList.toggle('showing', showHidden);
+  btn.textContent = showHidden ? 'הסתר מוסתרים' : 'הצג מוסתרים';
+  renderJobs();
+}
+
+function hideJob(id) {
+  if (!hiddenJobs.includes(id)) {
+    hiddenJobs.push(id);
+    localStorage.setItem('hiddenJobs', JSON.stringify(hiddenJobs));
+  }
+  renderJobs();
+}
+
+function unhideJob(id) {
+  const idx = hiddenJobs.indexOf(id);
+  if (idx > -1) { hiddenJobs.splice(idx, 1); localStorage.setItem('hiddenJobs', JSON.stringify(hiddenJobs)); }
   renderJobs();
 }
 
 function renderStats() {
-  const counts = { ngo: 0, admin: 0, hebrew: 0, social: 0, total: 0 };
-  JOBS.forEach(j => {
-    counts[j.category] = (counts[j.category] || 0) + 1;
-    counts.total++;
-  });
-
-  document.getElementById('statsBar').innerHTML = `
-    <div class="stat-card total"><div class="number">${counts.total}</div><div class="label">סה"כ משרות</div></div>
-    <div class="stat-card ngo"><div class="number">${counts.ngo}</div><div class="label">NGO / זכויות אדם</div></div>
-    <div class="stat-card admin"><div class="number">${counts.admin}</div><div class="label">אדמיניסטרציה</div></div>
-    <div class="stat-card hebrew"><div class="number">${counts.hebrew}</div><div class="label">עברית</div></div>
-    <div class="stat-card french"><div class="number">${counts.social}</div><div class="label">צרפתית</div></div>
+  const visible = JOBS.filter(j => !hiddenJobs.includes(j.id));
+  const counts = { ngo: 0, admin: 0, hebrew: 0, social: 0 };
+  visible.forEach(j => { if (counts[j.category] !== undefined) counts[j.category]++; });
+  document.getElementById('statsContainer').innerHTML = `
+    <div class="stat-card stat-total"><div class="number">${visible.length}</div><div class="label">סה"כ משרות</div></div>
+    <div class="stat-card stat-ngo"><div class="number">${counts.ngo}</div><div class="label">NGO / מדיניות</div></div>
+    <div class="stat-card stat-admin"><div class="number">${counts.admin}</div><div class="label">אדמיניסטרציה</div></div>
+    <div class="stat-card stat-hebrew"><div class="number">${counts.hebrew}</div><div class="label">עברית</div></div>
+    <div class="stat-card stat-social"><div class="number">${counts.social}</div><div class="label">צרפתית</div></div>
   `;
 }
 
 function renderJobs() {
-  const grid = document.getElementById('jobsGrid');
-  const filtered = JOBS.filter(j => {
-    if (activeFilter !== 'all' && j.category !== activeFilter) return false;
-    if (searchQuery) {
-      const q = searchQuery.toLowerCase();
-      const searchable = `${j.title} ${j.company} ${j.description} ${j.location}`.toLowerCase();
-      if (!searchable.includes(q)) return false;
-    }
-    return true;
-  }).sort((a, b) => b.matchScore - a.matchScore);
+  renderStats();
+  const container = document.getElementById('jobsContainer');
+  let filtered = JOBS;
+  if (currentFilter !== 'all') filtered = JOBS.filter(j => j.category === currentFilter);
 
-  grid.innerHTML = filtered.map(j => `
-    <div class="job-card" data-category="${j.category}">
-      ${j.isNew ? '<div class="new-badge">NEW</div>' : ''}
-      <span class="category-tag ${j.category}">${getCategoryLabel(j.category)}</span>
-      <h3>${j.title}</h3>
-      <div class="company">${j.company}</div>
-      <div class="description">${j.description}</div>
-      <div class="meta">
-        <span>${j.location}</span>
-        <span>${j.type}</span>
-        ${j.remote ? '<span>Remote</span>' : ''}
-        <span>נמצא: ${j.dateFound}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <span class="match-score ${j.matchScore >= 80 ? 'high' : 'medium'}">
-          ${j.matchScore >= 80 ? '&#9733;' : '&#9734;'} התאמה: ${j.matchScore}%
-        </span>
-        <a href="${j.url}" target="_blank" class="apply-btn">צפייה והגשה &larr;</a>
-      </div>
-    </div>
-  `).join('');
-}
+  // Sort: new first, then by matchScore desc
+  filtered.sort((a, b) => {
+    if (a.isNew && !b.isNew) return -1;
+    if (!a.isNew && b.isNew) return 1;
+    return b.matchScore - a.matchScore;
+  });
 
-function getCategoryLabel(cat) {
-  const labels = { ngo: 'NGO / זכויות אדם', admin: 'אדמיניסטרציה', hebrew: 'עברית', social: 'צרפתית' };
-  return labels[cat] || cat;
+  let html = '';
+  filtered.forEach(j => {
+    const isHidden = hiddenJobs.includes(j.id);
+    if (isHidden && !showHidden) return;
+    const scoreClass = j.matchScore >= 80 ? 'score-high' : 'score-med';
+    html += `
+      <div class="job-card ${j.category} ${isHidden ? 'hidden-job show-hidden' : ''}">
+        <div class="job-title"><a href="${j.url}" target="_blank">${j.title}</a></div>
+        <div class="job-company">${j.company}</div>
+        <div class="job-meta">
+          ${j.isNew ? '<span class="job-tag new">חדש!</span>' : ''}
+          <span class="job-tag ${scoreClass}">התאמה: ${j.matchScore}%</span>
+          <span class="job-tag">${j.location}</span>
+          <span class="job-tag">${j.type}</span>
+          ${j.remote ? '<span class="job-tag">🏠 remote</span>' : ''}
+          ${j.deadline ? '<span class="job-tag">⏰ ' + j.deadline + '</span>' : ''}
+        </div>
+        <div class="job-description">${j.description}</div>
+        <div class="job-actions">
+          <a href="${j.url}" target="_blank" class="btn-apply">📄 הגש מועמדות</a>
+          ${isHidden
+            ? '<button class="btn-hide" onclick="unhideJob(' + j.id + ')">↩️ שחזר</button>'
+            : '<button class="btn-hide" onclick="hideJob(' + j.id + ')">🙈 הסתר</button>'}
+        </div>
+      </div>
+    `;
+  });
+
+  if (!html) html = '<div class="no-results">אין משרות בקטגוריה הזו כרגע</div>';
+  container.innerHTML = html;
 }
 
 // Filter buttons
@@ -506,22 +312,15 @@ document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    activeFilter = btn.dataset.filter;
+    currentFilter = btn.dataset.filter;
     renderJobs();
   });
-});
-
-// Search
-document.getElementById('searchBox').addEventListener('input', e => {
-  searchQuery = e.target.value;
-  renderJobs();
 });
 
 // Last updated
 document.getElementById('lastUpdated').textContent = 'עדכון אחרון: ' + LAST_UPDATED;
 
-// Init
-renderStats();
+// Initial render
 renderJobs();
 </script>
 </body>
